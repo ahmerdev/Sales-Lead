@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposal for {{ proposal.client_name }} — {{ agency.display_agency_name }}</title>
+    
+    <!-- Theme Initializer -->
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        } else {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+        }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --brand-primary: {{ agency.brand_color|default:"#4f46e5" }};
+            --brand-accent: {{ agency.accent_color|default:"#06b6d4" }};
+        }
+        body { 
+            font-family: '{{ agency.font_family|default:"Plus Jakarta Sans" }}', -apple-system, BlinkMacSystemFont, sans-serif; 
+        }
+        .heading-font {
+            font-family: '{{ agency.font_family|default:"Space Grotesk" }}', sans-serif;
+        }
+        [x-cloak] { display: none !important; }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.35; transform: scale(1); }
+            50% { opacity: 0.75; transform: scale(1.05); }
+        }
+        .animate-float {
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+        .animate-glow {
+            animation: pulseGlow 4s ease-in-out infinite;
+        }
+        .hover-lift {
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3), 0 0 25px -5px var(--brand-primary);
+        }
+    </style>
+</head>
+<body class="min-h-full bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 py-10 px-4 sm:px-6 lg:px-8 selection:bg-indigo-500 selection:text-white relative overflow-x-hidden transition-colors duration-200"
+      x-data="{ 
+          isDark: document.documentElement.classList.contains('dark'),
+          toggleTheme() {
+              this.isDark = !this.isDark;
+              if (this.isDark) {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.classList.remove('light');
+                  localStorage.setItem('theme', 'dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.classList.add('light');
+                  localStorage.setItem('theme', 'light');
+              }
+              this.$nextTick(() => lucide.createIcons());
+          }
+      }">
+
+    <!-- Ambient Background Lighting -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute -top-40 left-1/4 w-[500px] h-[500px] rounded-full bg-indigo-600/10 blur-[120px] animate-glow"></div>
+        <div class="absolute top-1/2 -right-40 w-[450px] h-[450px] rounded-full bg-cyan-500/10 blur-[130px] animate-glow" style="animation-delay: 2s;"></div>
+    </div>
+
+    <div class="max-w-4xl mx-auto space-y-10 relative z-10">
+        
+        <!-- Top Agency Navigation Header -->
+        <header class="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-3xl bg-white/95 dark:bg-slate-900/75 border border-slate-200/90 dark:border-slate-800/80 backdrop-blur-xl shadow-md dark:shadow-xl">
+            <div class="flex items-center gap-3.5">
+                {% if agency.get_logo %}
+                <img src="{{ agency.get_logo }}" alt="{{ agency.display_agency_name }}" class="h-11 w-auto max-w-[140px] object-contain rounded-lg">
+                {% elif agency.logo_url %}
+                <img src="{{ agency.logo_url }}" alt="{{ agency.display_agency_name }}" class="h-11 w-auto max-w-[140px] object-contain rounded-lg">
+                {% else %}
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-indigo-600/30">
+                    {{ agency.display_agency_name|slice:":1"|upper }}
+                </div>
+                {% endif %}
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-black text-lg text-slate-900 dark:text-white tracking-tight">{{ agency.display_agency_name }}</span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                            <i data-lucide="shield-check" class="w-3 h-3"></i> Verified Agency
+                        </span>
+                    </div>
+                    {% if agency.agency_tagline %}
+                    <span class="block text-xs text-indigo-600 dark:text-indigo-400 font-medium">{{ agency.agency_tagline }}</span>
+                    {% else %}
+                    <span class="block text-xs text-slate-500 dark:text-slate-400">Official Client Proposal &amp; Solution Blueprint</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+                <!-- Theme Switcher -->
+                <button @click="toggleTheme()" 
+                        type="button"
+                        class="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition shadow-sm flex items-center justify-center shrink-0 overflow-hidden"
+                        title="Toggle Light / Dark mode">
+                    <span x-show="isDark" class="flex items-center justify-center">
+                        <i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+                    </span>
+                    <span x-show="!isDark" x-cloak class="flex items-center justify-center">
+                        <i data-lucide="moon" class="w-4 h-4 text-indigo-600"></i>
+                    </span>
+                </button>
+
+                <span class="px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5
+                    {% if proposal.status == 'ACCEPTED' %}bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm
+                    {% elif proposal.status == 'CANCELLED' %}bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30
+                    {% elif proposal.status == 'SENT' %}bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30
+                    {% else %}bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30{% endif %}">
+                    <span class="w-2 h-2 rounded-full {% if proposal.status == 'ACCEPTED' %}bg-emerald-500 dark:bg-emerald-400{% elif proposal.status == 'CANCELLED' %}bg-rose-500{% else %}bg-indigo-500 dark:bg-indigo-400 animate-pulse{% endif %}"></span>
+                    Status: {{ proposal.get_status_display }}
+                </span>
+                
+                {% if whatsapp_url %}
+                <a href="{{ whatsapp_url }}" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-black shadow-md shadow-emerald-600/20 transition">
+                    <svg class="w-3.5 h-3.5 fill-white shrink-0" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                    <span>WhatsApp</span>
+                </a>
+                {% endif %}
+            </div>
+        </header>
+
+        {% if proposal.status == 'CANCELLED' %}
+        <!-- Cancelled Notice Banner -->
+        <div class="p-6 rounded-3xl bg-rose-50 dark:bg-rose-950/80 border-2 border-rose-500/60 text-rose-900 dark:text-rose-100 flex items-start gap-4 shadow-xl backdrop-blur-xl">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0 shadow-lg">
+                <i data-lucide="ban" class="w-7 h-7"></i>
+            </div>
+            <div class="space-y-1">
+                <h2 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                    Proposal Inactive / Cancelled
+                </h2>
+                <p class="text-xs text-rose-800 dark:text-rose-300 leading-relaxed font-medium">
+                    This proposal for <strong>{{ proposal.client_name }}</strong> has been cancelled by {{ agency.display_agency_name }}. If you would like an updated or custom scope, please contact us directly.
+                </p>
+            </div>
+        </div>
+        {% elif accepted_just_now or proposal.status == 'ACCEPTED' %}
+        <!-- Acceptance Banner -->
+        <div class="p-6 rounded-3xl bg-emerald-50 dark:bg-emerald-950/80 border-2 border-emerald-500 text-emerald-900 dark:text-emerald-100 flex items-start gap-4 shadow-xl backdrop-blur-xl">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 shadow-lg">
+                <i data-lucide="check-check" class="w-7 h-7"></i>
+            </div>
+            <div class="space-y-1">
+                <h2 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                    Proposal Successfully Accepted! 🎉
+                </h2>
+                <p class="text-xs text-emerald-800 dark:text-emerald-300/90 leading-relaxed font-medium">
+                    Thank you, <strong>{{ proposal.client_name }}</strong>! Your project is locked in. Our development team has received your confirmation and is initiating the onboarding roadmap. We will reach out to you shortly.
+                </p>
+                {% if proposal.client_feedback %}
+                <div class="mt-3 p-3.5 rounded-2xl bg-white dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-500/30 text-xs italic text-slate-800 dark:text-emerald-200">
+                    "{{ proposal.client_feedback }}"
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% elif reply_sent_just_now %}
+        <!-- Reply Sent Banner -->
+        <div class="p-6 rounded-3xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-500/40 text-indigo-950 dark:text-indigo-100 flex items-start gap-4 shadow-xl backdrop-blur-xl">
+            <div class="w-11 h-11 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                <i data-lucide="send" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white">Message Delivered to {{ agency.display_agency_name }}!</h2>
+                <p class="text-xs text-indigo-700 dark:text-indigo-300 mt-1">Thank you for your response. We will review your note and get back to you promptly.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Master Proposal Document Card -->
+        <div class="bg-white/95 dark:bg-slate-900/90 rounded-3xl p-6 sm:p-10 border border-slate-200/90 dark:border-slate-800/90 shadow-2xl backdrop-blur-2xl space-y-8 relative overflow-hidden">
+            <!-- Decorative corner accent -->
+            <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent pointer-events-none"></div>
+
+            <!-- Header & Proposal Reference -->
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between border-b border-slate-200 dark:border-slate-800 pb-7 gap-4">
+                <div class="space-y-1.5">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] font-extrabold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2.5 py-0.5 rounded-lg border border-indigo-200 dark:border-indigo-500/20">
+                            Verified Proposal
+                        </span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400 font-mono">#LR-{{ proposal.id|stringformat:"04d" }}</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight heading-font">{{ proposal.title }}</h1>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">Engineered to drive direct client conversions, online bookings, and speed.</p>
+                </div>
+                <div class="text-xs text-slate-600 dark:text-slate-400 sm:text-right space-y-1 shrink-0">
+                    <div>Issued: <strong class="text-slate-900 dark:text-white">{{ proposal.created_at|date:"F d, Y" }}</strong></div>
+                    <div class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center sm:justify-end gap-1">
+                        <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                        Ready for Implementation
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client & Agency Metadata Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 space-y-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                        <i data-lucide="building" class="w-3 h-3 text-indigo-500"></i> Prepared Exclusively For
+                    </span>
+                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white">{{ proposal.client_name }}</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">
+                        {{ proposal.lead.city }}{% if proposal.lead.country %}, {{ proposal.lead.country }}{% endif %}
+                        {% if proposal.lead.industry %}<span class="text-slate-400">• {{ proposal.lead.industry }}</span>{% endif %}
+                    </p>
+                    {% if proposal.lead.website %}
+                    <a href="{{ proposal.lead.website }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
+                        <i data-lucide="globe" class="w-3 h-3"></i> {{ proposal.lead.website }}
+                    </a>
+                    {% endif %}
+                </div>
+
+                <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 space-y-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                        <i data-lucide="user-check" class="w-3 h-3 text-emerald-500"></i> Lead Consultant &amp; Agency
+                    </span>
+                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white">{{ owner.full_name|default:owner.username }}</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">{{ agency.display_agency_name }}</p>
+                    
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        {% if whatsapp_url %}
+                        <a href="{{ whatsapp_url }}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1 transition">
+                            <i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp
+                        </a>
+                        {% endif %}
+                        {% if contact_email %}
+                        <a href="mailto:{{ contact_email }}" class="px-2.5 py-1 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 text-[11px] font-bold flex items-center gap-1 transition">
+                            <i data-lucide="mail" class="w-3 h-3"></i> Email
+                        </a>
+                        {% endif %}
+                        {% if agency.agency_website %}
+                        <a href="{{ agency.agency_website }}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-bold flex items-center gap-1 transition">
+                            <i data-lucide="external-link" class="w-3 h-3"></i> Website
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deliverables & Solutions -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <h3 class="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="layers" class="w-4 h-4 text-indigo-500"></i>
+                        Proposed Deliverables &amp; Scope of Work
+                    </h3>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Tailored Architecture</span>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-sm text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed font-sans shadow-inner">
+{{ proposal.scope_summary }}
+                </div>
+            </div>
+
+            <!-- Timeline & Investment Overview Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-cyan-500"></i> Estimated Timeline
+                        </span>
+                        <span class="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">Fast-Track</span>
+                    </div>
+                    <div class="text-2xl font-black text-slate-900 dark:text-white heading-font">{{ proposal.timeline }}</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Includes staging environment, mobile audit, QA testing, and launch deployment.</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/30 space-y-2 relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center gap-1">
+                            <i data-lucide="badge-dollar-sign" class="w-3.5 h-3.5 text-indigo-500"></i> Total Investment
+                        </span>
+                        <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">All-Inclusive</span>
+                    </div>
+                    <div class="text-3xl font-black text-slate-900 dark:text-white heading-font tracking-tight flex items-baseline gap-1">
+                        <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400">{{ proposal.currency }}</span>
+                        <span>{{ proposal.investment_amount }}</span>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-indigo-200/80">{{ proposal.notes }}</p>
+                </div>
+            </div>
+
+            <!-- Client Action Buttons (Accept & Reply) -->
+            {% if proposal.status != 'ACCEPTED' and proposal.status != 'CANCELLED' %}
+            <div class="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-6" x-data="{ showReplyModal: false, showAcceptModal: false }">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-5 p-6 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-indigo-500/20">
+                    <div class="space-y-1 text-center sm:text-left">
+                        <h4 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center justify-center sm:justify-start gap-1.5">
+                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+                            Ready to Transform Your Online Conversions?
+                        </h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">Accept this proposal online to lock in your project kick-off slot immediately.</p>
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <button @click="showReplyModal = true; showAcceptModal = false" class="flex-1 sm:flex-none px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                            Ask a Question
+                        </button>
+                        <button @click="showAcceptModal = true; showReplyModal = false" class="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-xl shadow-emerald-600/30 transition flex items-center justify-center gap-2 transform active:scale-95">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            Accept &amp; Start
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Accept Modal -->
+                <div x-show="showAcceptModal" x-cloak class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-emerald-950/90 border-2 border-emerald-500 space-y-4 shadow-2xl backdrop-blur-xl">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-emerald-200 flex items-center gap-2">
+                            <i data-lucide="thumbs-up" class="w-4 h-4 text-emerald-500"></i>
+                            Confirm Proposal Acceptance
+                        </h4>
+                        <button @click="showAcceptModal = false" class="text-slate-400 hover:text-slate-900 dark:hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="accept">
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-emerald-300 mb-1.5">Preferred kick-off timeline or initial instructions:</label>
+                        <textarea name="client_notes" rows="2" placeholder="e.g. We are ready to proceed! Please send the onboarding details and invoice." class="w-full p-3 rounded-2xl border border-slate-200 dark:border-emerald-500/40 bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                        <div class="pt-3 flex items-center justify-end gap-3">
+                            <button type="button" @click="showAcceptModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-emerald-300 hover:bg-slate-100 dark:hover:bg-emerald-900/50">Cancel</button>
+                            <button type="submit" class="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 flex items-center gap-2">
+                                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                Confirm &amp; Sign Off
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Reply / Question Modal -->
+                <div x-show="showReplyModal" x-cloak class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-indigo-950/90 border-2 border-indigo-500 space-y-4 shadow-2xl backdrop-blur-xl">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-indigo-200 flex items-center gap-2">
+                            <i data-lucide="send" class="w-4 h-4 text-indigo-500"></i>
+                            Send Direct Note to {{ agency.display_agency_name }}
+                        </h4>
+                        <button @click="showReplyModal = false" class="text-slate-400 hover:text-slate-900 dark:hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="reply">
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-indigo-300 mb-1.5">What would you like to adjust or discuss?</label>
+                        <textarea name="message" rows="3" required placeholder="e.g. Can we include an Instagram feed widget? What is the deposit breakdown?" class="w-full p-3 rounded-2xl border border-slate-200 dark:border-indigo-500/40 bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <div class="pt-3 flex items-center justify-end gap-3">
+                            <button type="button" @click="showReplyModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-indigo-300 hover:bg-slate-100 dark:hover:bg-indigo-900/50">Cancel</button>
+                            <button type="submit" class="px-6 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+                                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                                Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% elif proposal.status == 'CANCELLED' %}
+            <div class="pt-6 border-t border-slate-200 dark:border-slate-800">
+                <div class="p-6 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="ban" class="w-6 h-6 text-rose-500 shrink-0"></i>
+                        <div>
+                            <h4 class="text-xs font-bold text-rose-700 dark:text-rose-300 uppercase tracking-wider">Proposal Cancelled</h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">This proposal is no longer active for online acceptance. Reach out to {{ agency.display_agency_name }} for an updated proposal.</p>
+                        </div>
+                    </div>
+                    {% if whatsapp_url %}
+                    <a href="{{ whatsapp_url }}" target="_blank" rel="noopener" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition shrink-0 flex items-center gap-1.5">
+                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                        Contact Us
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Proven Case Studies & Results Strip -->
+        <section class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
+                <div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 mb-2">
+                        <i data-lucide="award" class="w-3.5 h-3.5"></i> Proven Track Record
+                    </div>
+                    <h2 class="text-2xl font-black text-slate-900 dark:text-white heading-font">Real Results Delivered for Clients Like You</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Here is how our website enhancements and digital systems drove measurable revenue growth for past clients.</p>
+                </div>
+                {% if portfolio_url %}
+                <a href="{{ portfolio_url }}" target="_blank" rel="noopener" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1 group shrink-0">
+                    Browse All Projects <i data-lucide="arrow-right" class="w-3.5 h-3.5 transition transform group-hover:translate-x-1"></i>
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Portfolio Cards Animated Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% if featured_projects %}
+                    {% for project in featured_projects %}
+                    <div class="group relative rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/90 p-6 flex flex-col justify-between hover-lift overflow-hidden backdrop-blur-xl shadow-sm dark:shadow-xl">
+                        <div class="space-y-4">
+                            <!-- Category & Impact Badge -->
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800">
+                                    {{ project.category }}
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-ping"></span>
+                                    {{ project.result_metric }}
+                                </span>
+                            </div>
+
+                            <!-- Title & Client Name -->
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+                                    {{ project.title }}
+                                </h3>
+                                {% if project.client_name %}
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Delivered for <strong class="text-slate-700 dark:text-slate-300">{{ project.client_name }}</strong></p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Description -->
+                            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                {{ project.description }}
+                            </p>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="pt-5 mt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate flex items-center gap-1">
+                                <i data-lucide="check" class="w-3.5 h-3.5 text-indigo-500 shrink-0"></i>
+                                <span class="truncate">{{ project.technologies }}</span>
+                            </div>
+                            {% if project.demo_url %}
+                            <a href="{{ project.demo_url }}" target="_blank" rel="noopener" class="shrink-0 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-600/20 hover:bg-indigo-100 dark:hover:bg-indigo-600/40 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-xs font-bold transition flex items-center gap-1">
+                                <span>Preview</span>
+                                <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Built-in Showcase Cards -->
+                    <div class="group relative rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/90 p-6 flex flex-col justify-between hover-lift overflow-hidden backdrop-blur-xl shadow-sm dark:shadow-xl">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800">
+                                    Restaurant &amp; Food Ordering
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-ping"></span>
+                                    +340% Direct Orders
+                                </span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+                                    Direct WhatsApp POS &amp; Mobile Menu
+                                </h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Delivered for Bella Roma Bistro</p>
+                            </div>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                Replaced third-party high commission food aggregator links with an instant 1-click WhatsApp order builder, saving 25% in commissions and tripling repeat customer orders.
+                            </p>
+                        </div>
+                        <div class="pt-5 mt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">WhatsApp POS • Mobile UI • 0.8s Speed</span>
+                            <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">14-Day Delivery</span>
+                        </div>
+                    </div>
+
+                    <div class="group relative rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/90 p-6 flex flex-col justify-between hover-lift overflow-hidden backdrop-blur-xl shadow-sm dark:shadow-xl">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800">
+                                    Dental &amp; Healthcare Clinic
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-ping"></span>
+                                    2.8x Online Bookings
+                                </span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+                                    Instant Patient Appointment Booking Engine
+                                </h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Delivered for Apex Smiles Dental Center</p>
+                            </div>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                Designed a frictionless mobile calendar reservation funnel with automated SMS &amp; WhatsApp reminders, reducing appointment no-shows from 28% to less than 4%.
+                            </p>
+                        </div>
+                        <div class="pt-5 mt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Calendar Funnel • WhatsApp Alerts • SEO</span>
+                            <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">18-Day Delivery</span>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Trust Badges & Guarantee Footer Strip -->
+        <footer class="p-6 rounded-3xl bg-white/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md space-y-4 text-center shadow-sm">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-bold text-slate-600 dark:text-slate-400">
+                <div class="flex items-center justify-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
+                    <span>100% Satisfaction Guarantee</span>
+                </div>
+                <div class="flex items-center justify-center gap-2">
+                    <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+                    <span>High-Speed 95+ Mobile Score</span>
+                </div>
+                <div class="flex items-center justify-center gap-2">
+                    <i data-lucide="lock" class="w-4 h-4 text-indigo-500"></i>
+                    <span>Enterprise SSL Encryption</span>
+                </div>
+                <div class="flex items-center justify-center gap-2">
+                    <i data-lucide="headphones" class="w-4 h-4 text-cyan-500"></i>
+                    <span>Dedicated Client Support</span>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800/50">
+                &copy; {{ proposal.created_at|date:"Y" }} {{ agency.display_agency_name }}. All rights reserved. Generated via LeadRadar AI.
+            </p>
+        </footer>
+
+    </div>
+
+    <!-- Floating Sticky Quick Action for Mobile / Client -->
+    {% if whatsapp_url and proposal.status != 'ACCEPTED' %}
+    <div class="fixed bottom-6 right-6 z-40">
+        <a href="{{ whatsapp_url }}" target="_blank" rel="noopener" class="flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-black text-xs shadow-2xl shadow-emerald-500/50 transition-all hover:scale-105 border border-white/20">
+            <svg class="w-4 h-4 fill-white shrink-0" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            <span>Chat Directly on WhatsApp</span>
+        </a>
+    </div>
+    {% endif %}
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

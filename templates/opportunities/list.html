@@ -1,0 +1,105 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Opportunity Engine Intelligence — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="space-y-6 w-full">
+    <!-- Header with Live Metric Badges -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
+                    Algorithmic Detection
+                </span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">{{ opportunities|length }} Total Monetizable Pitches</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2">Opportunity Engine Services Feed</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+                Automated mapping of detected client technical deficiencies into high-ticket agency deliverables &amp; pitch offers
+            </p>
+        </div>
+        <div class="flex items-center gap-2.5 self-start sm:self-center">
+            <a href="{% url 'scanner:index' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold shadow-sm transition">
+                <i data-lucide="scan" class="w-4 h-4 text-indigo-500"></i>
+                Run Website Audits
+            </a>
+            <a href="{% url 'proposals:list' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition">
+                <i data-lucide="file-check-2" class="w-4 h-4"></i>
+                View Proposals
+            </a>
+        </div>
+    </div>
+
+    <!-- Opportunity Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for opp in opportunities %}
+        <div class="group bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm dark:shadow-xl backdrop-blur-2xl space-y-4 hover:border-indigo-400 dark:hover:border-slate-700 transition-all duration-300 hover:-translate-y-1">
+            <!-- Top Badges -->
+            <div class="flex items-center justify-between gap-2">
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                    {{ opp.get_category_display }}
+                </span>
+                <span class="inline-flex items-center gap-1 text-xs font-extrabold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-xl">
+                    <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                    +{{ opp.score_impact }} PTS
+                </span>
+            </div>
+
+            <!-- Client & Service Title -->
+            <div class="space-y-1">
+                <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                    <a href="{% url 'leads:detail' pk=opp.lead.id %}" class="font-bold hover:text-indigo-600 dark:hover:text-indigo-400 transition flex items-center gap-1 truncate">
+                        <i data-lucide="building" class="w-3.5 h-3.5 shrink-0 text-slate-400"></i>
+                        <span class="truncate">{{ opp.lead.business_name }}</span>
+                    </a>
+                    <span class="text-[11px] font-semibold shrink-0">{{ opp.lead.city|default:opp.lead.country|default:"Target" }}</span>
+                </div>
+                <h3 class="text-base font-extrabold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+                    {{ opp.recommended_service }}
+                </h3>
+            </div>
+
+            <!-- Description -->
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                {{ opp.description }}
+            </div>
+
+            <!-- Action Bar -->
+            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    {{ opp.lead.industry|default:"Business" }}
+                </span>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'proposals:create' lead_id=opp.lead.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 text-xs font-bold transition">
+                        <i data-lucide="file-plus" class="w-3.5 h-3.5"></i>
+                        Proposal
+                    </a>
+                    <a href="{% url 'leads:detail' pk=opp.lead.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition">
+                        Inspect &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-20 bg-white/95 dark:bg-slate-900/40 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm">
+            <div class="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400 shadow-md">
+                <i data-lucide="cpu" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">No opportunities calculated yet</h3>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+                Open any discovered lead from your pipeline and click "Scan Website" to automatically trigger the Opportunity Engine.
+            </p>
+            <div class="mt-6 flex items-center justify-center gap-3">
+                <a href="{% url 'leads:find_leads' %}" class="px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition">
+                    Find New Leads &rarr;
+                </a>
+                <a href="{% url 'scanner:index' %}" class="px-5 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 text-xs font-bold transition">
+                    Run Audits
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

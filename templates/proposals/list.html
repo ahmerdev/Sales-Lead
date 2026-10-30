@@ -1,0 +1,77 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Client Proposals — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="space-y-6 w-full">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Client Proposals</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">Generated scopes of work, pricing estimates, and closed client deals</p>
+        </div>
+        <a href="{% url 'leads:list' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition self-start sm:self-center">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Create Proposal from Lead
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for p in proposals %}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm dark:shadow-xl space-y-4 hover:border-indigo-400 dark:hover:border-slate-700 transition">
+            <div class="flex items-center justify-between">
+                <span class="px-3 py-1 rounded-full text-xs font-bold
+                    {% if p.status == 'ACCEPTED' %}bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30
+                    {% elif p.status == 'CANCELLED' %}bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30
+                    {% elif p.status == 'SENT' %}bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30
+                    {% else %}bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30{% endif %}">
+                    {{ p.get_status_display }}
+                </span>
+                <span class="text-base font-black {% if p.status == 'CANCELLED' %}line-through text-slate-400{% else %}text-emerald-600 dark:text-emerald-400{% endif %}">
+                    {{ p.currency }} {{ p.investment_amount }}
+                </span>
+            </div>
+
+            <div>
+                <h3 class="text-base font-extrabold text-slate-900 dark:text-white">{{ p.client_name }}</h3>
+                <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5 truncate">{{ p.title }}</p>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Timeline</div>
+                <div class="font-semibold">{{ p.timeline }}</div>
+            </div>
+
+            <div class="pt-2 flex items-center gap-2">
+                <a href="{% url 'proposals:detail' pk=p.id %}" class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold transition shadow-sm">
+                    Open Proposal &rarr;
+                </a>
+                {% if p.status != 'CANCELLED' %}
+                <form action="{% url 'proposals:cancel' pk=p.id %}" method="POST" onsubmit="return confirm('Cancel this proposal for {{ p.client_name }}?')">
+                    {% csrf_token %}
+                    <button type="submit" class="p-2.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-900/60 transition" title="Cancel Proposal">
+                        <i data-lucide="ban" class="w-4 h-4"></i>
+                    </button>
+                </form>
+                {% else %}
+                <form action="{% url 'proposals:cancel' pk=p.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reopen">
+                    <button type="submit" class="p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-900/60 transition" title="Reactivate As Draft">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 text-center py-16 bg-white/95 dark:bg-slate-900/40 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-8">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3 text-indigo-500">
+                <i data-lucide="file-check-2" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">No proposals drafted yet</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">Open any lead from your database and click "Create Proposal".</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

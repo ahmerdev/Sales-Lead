@@ -1,0 +1,87 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Cold Outreach Campaigns — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="space-y-6 w-full">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Outreach Campaigns</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">Approval-based personalized cold email campaigns for {{ current_workspace.name }}</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'outreach:create_campaign' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Create Campaign</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Campaigns List -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for c in campaigns %}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm dark:shadow-xl space-y-4 hover:border-indigo-400 dark:hover:border-slate-700 transition">
+            <div class="flex items-center justify-between">
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30">
+                    {{ c.industry_target }}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    {{ c.get_status_display }}
+                </span>
+            </div>
+
+            <div>
+                <h3 class="text-base font-extrabold text-slate-900 dark:text-white">{{ c.name }}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Created {{ c.created_at|date:"M d, Y" }}</p>
+            </div>
+
+            <!-- Campaign Stats -->
+            <div class="grid grid-cols-4 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-center">
+                <div class="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-100 dark:border-slate-800/60">
+                    <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Leads</div>
+                    <div class="text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">{{ c.total_leads_count }}</div>
+                </div>
+                <div class="p-2.5 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40">
+                    <div class="text-[10px] text-blue-600 dark:text-blue-400 uppercase font-bold tracking-wider">Sent</div>
+                    <div class="text-sm font-extrabold text-blue-600 dark:text-blue-400 mt-0.5">{{ c.sent_count }}</div>
+                </div>
+                <div class="p-2.5 rounded-2xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/40">
+                    <div class="text-[10px] text-purple-600 dark:text-purple-400 uppercase font-bold tracking-wider">Replies</div>
+                    <div class="text-sm font-extrabold text-purple-600 dark:text-purple-400 mt-0.5">{{ c.replies_count }}</div>
+                </div>
+                <div class="p-2.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40">
+                    <div class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold tracking-wider">Interest</div>
+                    <div class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">{{ c.interested_count }}</div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <a href="{% url 'outreach:detail' pk=c.id %}" class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold transition shadow-sm">
+                    Review &amp; Approve Pitches &rarr;
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 text-center py-16 bg-white dark:bg-slate-900/40 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-8">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3 text-indigo-500">
+                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">No campaigns created</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">Start an outreach campaign to review and approve tailored cold email pitches.</p>
+            <div class="mt-4">
+                <a href="{% url 'outreach:create_campaign' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition">
+                    Create Campaign
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

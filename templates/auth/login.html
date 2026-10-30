@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — LeadRadar AI | B2B Lead &amp; Deal Engine</title>
+    
+    <!-- Theme Initializer (prevents flash of wrong theme) -->
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        } else {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+        }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#FF5B26',
+                            coral: '#FF6A3D',
+                            dark: '#111827',
+                            surface: '#F4F5F8',
+                            darkSurface: '#090D16',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; 
+        }
+        .heading-font { 
+            font-family: 'Space Grotesk', sans-serif; 
+        }
+        [x-cloak] { display: none !important; }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.25; transform: scale(1); }
+            50% { opacity: 0.55; transform: scale(1.08); }
+        }
+        .animate-glow { 
+            animation: pulseGlow 6s ease-in-out infinite; 
+        }
+
+        .bg-grid-pattern {
+            background-size: 32px 32px;
+            background-image: linear-gradient(to right, rgba(255, 91, 38, 0.04) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 91, 38, 0.04) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="min-h-full bg-[#F4F5F8] dark:bg-[#090D16] text-slate-900 dark:text-slate-100 selection:bg-[#FF5B26] selection:text-white transition-colors duration-200 flex flex-col justify-between relative overflow-x-hidden bg-grid-pattern"
+      x-data="{
+          isDark: document.documentElement.classList.contains('dark'),
+          showPassword: false,
+          email: '{{ form.email.value|default:'' }}',
+          password: '',
+          demoFilledToast: false,
+          toggleTheme() {
+              this.isDark = !this.isDark;
+              if (this.isDark) {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.classList.remove('light');
+                  localStorage.setItem('theme', 'dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.classList.add('light');
+                  localStorage.setItem('theme', 'light');
+              }
+          },
+          fillDemoCredentials() {
+              this.email = 'Lead@admin.com';
+              this.password = 'password123';
+              this.demoFilledToast = true;
+              setTimeout(() => this.demoFilledToast = false, 3500);
+          }
+      }">
+
+    <!-- Ambient Backdrop Glows -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[650px] h-[650px] bg-[#FF5B26]/10 rounded-full blur-[140px] animate-glow"></div>
+        <div class="absolute bottom-0 right-10 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    </div>
+
+    <!-- Top Navigation Header -->
+    <header class="w-full max-w-5xl mx-auto px-6 py-6 flex items-center justify-between relative z-10">
+        <a href="{% url 'login' %}" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-2xl bg-[#FF5B26] flex items-center justify-center text-white shadow-lg shadow-[#FF5B26]/25 group-hover:scale-105 transition-transform duration-200">
+                <!-- Authentic Radar Vector SVG -->
+                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19.07 4.93a10 10 0 0 0-14.14 0"/>
+                    <path d="M16.24 7.76a6 6 0 0 0-8.48 0"/>
+                    <circle cx="12" cy="12" r="2"/>
+                    <path d="m12 12 5-5"/>
+                </svg>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white heading-font">LeadRadar</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-[#FF5B26]/10 text-[#FF5B26] border border-[#FF5B26]/25">
+                        HQ Pro
+                    </span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Dark / Light Mode Switcher with Real SVG Icons -->
+        <button @click="toggleTheme()" 
+                type="button" 
+                class="w-10 h-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-300 hover:text-[#FF5B26] dark:hover:text-[#FF5B26] hover:border-[#FF5B26]/50 transition shadow-sm flex items-center justify-center"
+                title="Toggle Light / Dark mode">
+            <span x-show="isDark" class="flex items-center justify-center">
+                <!-- Real Sun SVG -->
+                <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+            </span>
+            <span x-show="!isDark" x-cloak class="flex items-center justify-center">
+                <!-- Real Moon SVG -->
+                <svg class="w-4 h-4 text-[#FF5B26]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+            </span>
+        </button>
+    </header>
+
+    <!-- Main Centered Login Container -->
+    <main class="w-full max-w-md mx-auto px-4 py-8 relative z-10 my-auto">
+        
+        <!-- Modern Rounded Floating Card -->
+        <div class="bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 rounded-[32px] p-7 sm:p-9 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] space-y-6">
+            
+            <!-- Headline & Subtitle -->
+            <div class="text-center space-y-1.5">
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight heading-font">
+                    Agency Sign In
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+                    B2B Lead Discovery, Automated Audits &amp; Client Proposals
+                </p>
+            </div>
+
+            <!-- 1-Click Super Admin Demo Auto-Fill Banner (Real Vector Lightning Icon) -->
+            <div class="relative">
+                <button type="button" 
+                        @click="fillDemoCredentials()" 
+                        class="w-full p-3.5 rounded-2xl bg-orange-50/80 dark:bg-orange-950/25 hover:bg-orange-100 dark:hover:bg-orange-900/40 border border-orange-200 dark:border-orange-800/60 transition-all text-left flex items-center justify-between group shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-xl bg-[#FF5B26] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-[#FF5B26]/25 shrink-0">
+                            <!-- Real Lightning Vector SVG -->
+                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                            </svg>
+                        </span>
+                        <div>
+                            <span class="text-xs font-extrabold text-slate-900 dark:text-white block">One-Click Super Admin Demo</span>
+                            <span class="text-[11px] text-[#FF5B26] dark:text-[#FF8C66] font-mono font-bold">Lead@admin.com &bull; password123</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-extrabold text-[#FF5B26] group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                        <span>Fill</span>
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </button>
+
+                <!-- Feedback Toast -->
+                <div x-show="demoFilledToast" 
+                     x-cloak 
+                     x-transition 
+                     class="absolute -top-3 right-3 px-3 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-bold shadow-lg flex items-center gap-1.5 animate-bounce">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Credentials Loaded! Tap Sign In</span>
+                </div>
+            </div>
+
+            <!-- Messages / Alerts -->
+            {% if messages %}
+            <div class="space-y-2">
+                {% for message in messages %}
+                <div class="p-3.5 rounded-2xl border text-xs font-semibold flex items-start gap-2.5 shadow-sm
+                    {% if message.tags == 'warning' %}bg-amber-500/15 border-amber-500/30 text-amber-800 dark:text-amber-200
+                    {% elif message.tags == 'error' %}bg-rose-500/15 border-rose-500/30 text-rose-800 dark:text-rose-200
+                    {% elif message.tags == 'success' %}bg-emerald-500/15 border-emerald-500/30 text-emerald-800 dark:text-emerald-200
+                    {% else %}bg-[#FF5B26]/10 border-[#FF5B26]/30 text-[#FF5B26] dark:text-[#FF8C66]{% endif %}">
+                    <svg class="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12"></line>
+                        <line x1="12" y1="16" x2="16"></line>
+                    </svg>
+                    <div class="flex-1 leading-relaxed">{{ message }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if form.errors %}
+            <div class="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs space-y-1 font-medium">
+                <div class="font-bold flex items-center gap-1.5">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12"></line>
+                        <line x1="12" y1="16" x2="16"></line>
+                    </svg>
+                    <span>Please verify your credentials:</span>
+                </div>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div class="pl-5">&bull; {{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <div class="pl-5">&bull; {{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Clean Authentication Form -->
+            <form method="POST" action="{% url 'login' %}" class="space-y-4">
+                {% csrf_token %}
+
+                <!-- Work Email -->
+                <div class="space-y-1.5">
+                    <label for="id_email" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                        Work Email Address
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <!-- Real Envelope SVG -->
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                            </svg>
+                        </div>
+                        <input type="email" 
+                               name="email" 
+                               id="id_email" 
+                               x-model="email"
+                               required 
+                               placeholder="Lead@admin.com"
+                               class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5B26] focus:border-[#FF5B26] transition shadow-sm">
+                    </div>
+                </div>
+
+                <!-- Password with Show/Hide Toggle -->
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <label for="id_password" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Password
+                        </label>
+                        <a href="{% url 'password_reset' %}" class="text-xs font-bold text-[#FF5B26] hover:underline">
+                            Forgot password?
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <!-- Real Lock SVG -->
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <input :type="showPassword ? 'text' : 'password'" 
+                               name="password" 
+                               id="id_password" 
+                               x-model="password"
+                               required 
+                               placeholder="••••••••"
+                               class="w-full pl-10 pr-11 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5B26] focus:border-[#FF5B26] transition shadow-sm">
+                        
+                        <!-- Show / Hide Password Button with Real Eye SVGs -->
+                        <button type="button" 
+                                @click="showPassword = !showPassword" 
+                                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                                title="Toggle password visibility">
+                            <span x-show="!showPassword" class="flex items-center">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </span>
+                            <span x-show="showPassword" x-cloak class="flex items-center">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+                                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+                                    <line x1="2" x2="22" y1="2" y2="22"></line>
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me Checkbox -->
+                <div class="flex items-center pt-1">
+                    <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input type="checkbox" name="remember" checked class="w-4 h-4 rounded text-[#FF5B26] focus:ring-[#FF5B26] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
+                        <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">Keep me signed in for 30 days</span>
+                    </label>
+                </div>
+
+                <!-- Submit Button (Finexy Dark Pill Button) -->
+                <button type="submit" 
+                        class="w-full py-3.5 px-6 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-extrabold text-sm shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-2">
+                    <span>Sign In to Agency Command Center</span>
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Bottom Registration Prompt -->
+            <div class="pt-4 border-t border-slate-200 dark:border-slate-800 text-center">
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Don't have an agency account yet?
+                    <a href="{% url 'register' %}" class="font-extrabold text-[#FF5B26] hover:underline inline-flex items-center gap-1 ml-1">
+                        Create Free Workspace &rarr;
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Trust Badges Underneath Card (Real Vector SVGs - No Emojis) -->
+        <div class="mt-6 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 px-2 flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>All Agency Services Operational</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="flex items-center gap-1.5 font-medium">
+                    <!-- Real Lock SVG -->
+                    <svg class="w-3.5 h-3.5 text-[#FF5B26]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    256-Bit SSL
+                </span>
+                <span class="flex items-center gap-1.5 font-medium">
+                    <!-- Real Shield Check SVG -->
+                    <svg class="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                    Role Security
+                </span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-5 text-xs text-slate-500 dark:text-slate-400 relative z-10">
+        &copy; 2026 LeadRadar AI. High-Performance B2B Lead Intelligence.
+    </footer>
+
+</body>
+</html>

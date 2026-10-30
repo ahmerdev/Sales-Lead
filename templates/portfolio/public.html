@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ agency.display_agency_name }} — High-Performance Web Engineering &amp; Client Case Studies</title>
+    <meta name="description" content="{{ agency.agency_tagline|default:'Proven website transformations, mobile ordering systems, and high-converting web solutions.' }}">
+
+    <!-- Theme Initializer (prevents flash of wrong theme) -->
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+        } else {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+        }
+    </script>
+
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons 1.11.3 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Google Fonts: Dynamically Loading All Popular Presets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300..900;1,300..900&family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-primary: {{ agency.brand_color|default:"#4f46e5" }};
+            --brand-accent: {{ agency.accent_color|default:"#06b6d4" }};
+            --brand-glow: {{ agency.brand_color|default:"#4f46e5" }}33;
+            --bs-primary: {{ agency.brand_color|default:"#4f46e5" }};
+        }
+
+        body {
+            font-family: '{{ agency.font_family|default:"Plus Jakarta Sans" }}', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .heading-font {
+            font-family: 'Space Grotesk', '{{ agency.font_family|default:"Plus Jakarta Sans" }}', sans-serif;
+        }
+
+        /* Continuous Animated Background Mesh Glow */
+        @keyframes floatOrb1 {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+            50% { transform: translate(60px, 40px) scale(1.15); opacity: 0.4; }
+            100% { transform: translate(-30px, 60px) scale(0.95); opacity: 0.25; }
+        }
+
+        @keyframes floatOrb2 {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+            50% { transform: translate(-50px, -30px) scale(1.2); opacity: 0.35; }
+            100% { transform: translate(40px, -50px) scale(0.9); opacity: 0.2; }
+        }
+
+        .ambient-glow-1 {
+            position: absolute;
+            top: -100px;
+            left: 15%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--brand-primary) 0%, rgba(79, 70, 229, 0) 70%);
+            filter: blur(90px);
+            pointer-events: none;
+            z-index: 0;
+            animation: floatOrb1 14s ease-in-out infinite alternate;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            top: 30%;
+            right: -80px;
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, var(--brand-accent) 0%, rgba(6, 182, 212, 0) 70%);
+            filter: blur(90px);
+            pointer-events: none;
+            z-index: 0;
+            animation: floatOrb2 16s ease-in-out infinite alternate;
+        }
+
+        /* Glassmorphism Cards */
+        [data-bs-theme="dark"] .glass-card {
+            background-color: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-bs-theme="light"] .glass-card {
+            background-color: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.07);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Navigation Bar */
+        .agency-nav {
+            border-radius: 28px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        [data-bs-theme="dark"] .agency-nav {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+        }
+        [data-bs-theme="light"] .agency-nav {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Modern Gradient Text */
+        .gradient-text-primary {
+            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-accent) 60%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Spring Physics Hover Lift */
+        .hover-lift {
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-8px) scale(1.008);
+        }
+        [data-bs-theme="dark"] .hover-lift:hover {
+            box-shadow: 0 24px 45px -12px rgba(0, 0, 0, 0.7), 0 0 30px -5px var(--brand-glow);
+            border-color: var(--brand-primary) !important;
+        }
+        [data-bs-theme="light"] .hover-lift:hover {
+            box-shadow: 0 24px 45px -12px rgba(0, 0, 0, 0.1), 0 0 25px -5px var(--brand-glow);
+            border-color: var(--brand-primary) !important;
+        }
+
+        /* Browser Mockup Chrome */
+        .mockup-header {
+            height: 38px;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 6px;
+            border-top-left-radius: inherit;
+            border-top-right-radius: inherit;
+        }
+        [data-bs-theme="dark"] .mockup-header {
+            background: #0f172a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        [data-bs-theme="light"] .mockup-header {
+            background: #f1f5f9;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .mockup-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .mockup-dot-red { background: #ef4444; }
+        .mockup-dot-yellow { background: #f59e0b; }
+        .mockup-dot-green { background: #10b981; }
+
+        .mockup-address-bar {
+            margin-left: 8px;
+            flex: 1;
+            max-width: 280px;
+            height: 22px;
+            border-radius: 6px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            color: #94a3b8;
+            font-family: monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        [data-bs-theme="dark"] .mockup-address-bar { background: #1e293b; }
+        [data-bs-theme="light"] .mockup-address-bar { background: #e2e8f0; color: #475569; }
+
+        /* Mockup Image Zoom on Hover */
+        .mockup-cover {
+            overflow: hidden;
+            position: relative;
+        }
+        .mockup-cover img {
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .hover-lift:hover .mockup-cover img {
+            transform: scale(1.06);
+        }
+
+        /* KPI Badge Illumination */
+        .kpi-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 14px;
+        }
+
+        /* Custom Rounded Radii */
+        .rounded-4xl { border-radius: 28px !important; }
+        .rounded-3xl { border-radius: 20px !important; }
+        .rounded-2xl { border-radius: 14px !important; }
+
+        /* Official WhatsApp Button */
+        .btn-whatsapp {
+            background-color: #25D366;
+            color: #ffffff;
+            font-weight: 800;
+            border: none;
+            transition: all 0.25s ease;
+        }
+        .btn-whatsapp:hover {
+            background-color: #20bd5a;
+            color: #ffffff;
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.45);
+            transform: translateY(-2px);
+        }
+
+        /* Floating WhatsApp Button */
+        .floating-whatsapp {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1040;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 22px;
+            border-radius: 50px;
+            background: #25D366;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .floating-whatsapp:hover {
+            background: #20bd5a;
+            color: #ffffff;
+            transform: scale(1.06) translateY(-4px);
+            box-shadow: 0 16px 35px rgba(37, 211, 102, 0.65);
+        }
+
+        /* Tech Badges */
+        .tech-pill {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 11px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        [data-bs-theme="dark"] .tech-pill {
+            background: rgba(255, 255, 255, 0.05);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        [data-bs-theme="light"] .tech-pill {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Animated Pulse Ping */
+        @keyframes pulsePing {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(37, 211, 102, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #25D366;
+            display: inline-block;
+            animation: pulsePing 2s infinite;
+        }
+
+        /* Accordion Custom Styling */
+        .agency-accordion .accordion-button {
+            padding: 1.25rem 1.5rem;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 18px !important;
+            transition: all 0.2s ease;
+        }
+        .agency-accordion .accordion-item {
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px !important;
+            overflow: hidden;
+            background: transparent;
+        }
+        [data-bs-theme="light"] .agency-accordion .accordion-item {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .agency-accordion .accordion-button:not(.collapsed) {
+            background-color: rgba(79, 70, 229, 0.08);
+            color: var(--brand-primary);
+        }
+    </style>
+</head>
+<body class="position-relative">
+
+    <!-- Ambient Animated Glow Blobs -->
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <!-- Top Sticky Header Navigation -->
+    <div class="container sticky-top pt-3 z-3">
+        <header class="agency-nav p-3 px-md-4 d-flex align-items-center justify-content-between">
+            <!-- Brand Logo & Verification Badge -->
+            <div class="d-flex align-items-center gap-3">
+                {% if agency.get_logo %}
+                <img src="{{ agency.get_logo }}" alt="{{ agency.display_agency_name }}" class="rounded-2xl" style="height: 44px; width: auto; object-fit: contain;">
+                {% elif agency.logo_url %}
+                <img src="{{ agency.logo_url }}" alt="{{ agency.display_agency_name }}" class="rounded-2xl" style="height: 44px; width: auto; object-fit: contain;">
+                {% else %}
+                <!-- Modern Gradient Brand Emblem -->
+                <div class="rounded-2xl d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" 
+                     style="width: 44px; height: 44px; background: linear-gradient(135deg, var(--brand-primary) 0%, #7c3aed 50%, var(--brand-accent) 100%); font-weight: 900; font-size: 20px;">
+                    {{ agency.display_agency_name|slice:":1"|upper }}
+                </div>
+                {% endif %}
+
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold fs-5 text-body heading-font lh-1">{{ agency.display_agency_name }}</span>
+                        <!-- Verified Agency Badge -->
+                        <span class="badge rounded-pill d-inline-flex align-items-center gap-1 bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 10px; font-weight: 800;">
+                            <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/>
+                            </svg>
+                            VERIFIED
+                        </span>
+                    </div>
+                    <div class="small text-primary fw-semibold text-truncate d-none d-sm-block mt-1" style="font-size: 11px; max-width: 340px;">
+                        {% if agency.agency_tagline and agency.agency_tagline|lower != 'test' %}
+                            {{ agency.agency_tagline }}
+                        {% else %}
+                            High-Performance Web Engineering &bull; Direct Revenue Systems
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links (Anchors) -->
+            <nav class="d-none d-lg-flex align-items-center gap-4 text-xs fw-bold">
+                <a href="#projects" class="text-secondary text-decoration-none hover-lift">Case Studies</a>
+                <a href="#capabilities" class="text-secondary text-decoration-none hover-lift">Capabilities</a>
+                <a href="#process" class="text-secondary text-decoration-none hover-lift">14-Day Process</a>
+                <a href="#reviews" class="text-secondary text-decoration-none hover-lift">Reviews</a>
+                <a href="#faq" class="text-secondary text-decoration-none hover-lift">FAQ</a>
+            </nav>
+
+            <!-- Right Controls: Theme Toggle, Quote Modal, WhatsApp, Email -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- Theme Switcher (Dark / Light) -->
+                <button type="button" 
+                        class="btn btn-sm btn-outline-secondary rounded-2xl d-flex align-items-center justify-content-center p-2" 
+                        id="themeToggleBtn"
+                        title="Toggle Light / Dark mode" 
+                        style="width: 38px; height: 38px;">
+                    <i class="bi bi-sun-fill text-warning d-none" id="themeSunIcon"></i>
+                    <i class="bi bi-moon-stars-fill text-primary" id="themeMoonIcon"></i>
+                </button>
+
+                <!-- Get Instant Quote Trigger -->
+                <button type="button" 
+                        class="btn btn-sm btn-outline-primary fw-bold rounded-2xl d-none d-md-inline-flex align-items-center gap-2 px-3 py-2" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#instantQuoteModal">
+                    <i class="bi bi-lightning-charge-fill text-warning"></i>
+                    <span>Get Instant Quote</span>
+                </button>
+
+                <!-- Official WhatsApp Button -->
+                {% if whatsapp_url or agency.whatsapp_number %}
+                <a href="{{ whatsapp_url|default:'https://wa.me/923062180602' }}" 
+                   target="_blank" 
+                   rel="noopener" 
+                   class="btn btn-sm btn-whatsapp rounded-2xl d-inline-flex align-items-center gap-2 px-3.5 py-2 shadow-sm">
+                    <span class="pulse-dot"></span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                    <span>WhatsApp</span>
+                </a>
+                {% endif %}
+            </div>
+        </header>
+    </div>
+
+    <!-- Main Hero Section -->
+    <section class="container py-5 text-center position-relative z-1" style="max-width: 980px;">
+        <!-- High-Performance Energy Pill -->
+        <div class="d-inline-flex align-items-center gap-2 px-3.5 py-1.5 rounded-pill border bg-body-tertiary shadow-sm mb-4">
+            <span class="badge rounded-pill bg-warning text-dark px-2.5 py-1 fw-bold" style="font-size: 10px;">PROVEN RESULTS</span>
+            <span class="small fw-bold text-body-secondary text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">
+                0% Aggregator Commission &bull; 1-Click WhatsApp POS &bull; Sub-Second Speed
+            </span>
+        </div>
+
+        <!-- Hero Headline -->
+        <h1 class="display-4 fw-black text-body heading-font mb-3 lh-sm">
+            Transforming Outdated Websites Into 
+            <span class="gradient-text-primary">Direct Revenue</span> Engines
+        </h1>
+
+        <!-- High-Converting Subheadline -->
+        <p class="lead text-body-secondary mx-auto mb-4" style="max-width: 740px; font-size: 1.15rem; line-height: 1.65;">
+            {% if agency.agency_about and agency.agency_about|lower != 'test' and agency.agency_about|length > 15 %}
+                {{ agency.agency_about }}
+            {% else %}
+                We engineer ultra-fast, mobile-first web platforms for restaurants, clinics, and modern businesses — eliminating expensive 20–30% aggregator fees, capturing 1-click WhatsApp orders, and automating appointments with zero friction.
+            {% endif %}
+        </p>
+
+        <!-- Hero Action Buttons -->
+        <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-5">
+            {% if whatsapp_url or agency.whatsapp_number %}
+            <a href="{{ whatsapp_url|default:'https://wa.me/923062180602' }}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-lg rounded-2xl px-4 py-3 d-inline-flex align-items-center gap-2 shadow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+                <span>Book Free Discovery Call</span>
+            </a>
+            {% endif %}
+
+            <button type="button" class="btn btn-outline-secondary btn-lg rounded-2xl px-4 py-3 fw-bold d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#instantQuoteModal">
+                <i class="bi bi-file-earmark-text-fill text-primary"></i>
+                <span>Get Instant Project Quote</span>
+            </button>
+        </div>
+
+        <!-- 4 Illuminated Metric Cards (KPI Strip) -->
+        <div class="row g-3 g-md-4 text-start">
+            <!-- Metric 1: Orders -->
+            <div class="col-6 col-lg-3">
+                <div class="card glass-card rounded-3xl p-3 p-md-4 h-100 hover-lift">
+                    <div class="kpi-icon-box bg-success-subtle text-success">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div class="h2 fw-black text-body mb-1 heading-font">+380%</div>
+                    <div class="small fw-bold text-body-secondary">Direct Orders Growth</div>
+                    <div class="text-secondary mt-1" style="font-size: 11px;">Bypassing third-party commission apps</div>
+                </div>
+            </div>
+
+            <!-- Metric 2: Speed -->
+            <div class="col-6 col-lg-3">
+                <div class="card glass-card rounded-3xl p-3 p-md-4 h-100 hover-lift">
+                    <div class="kpi-icon-box bg-info-subtle text-info">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <div class="h2 fw-black text-info mb-1 heading-font">0.6s</div>
+                    <div class="small fw-bold text-body-secondary">Sub-Second Load Time</div>
+                    <div class="text-secondary mt-1" style="font-size: 11px;">98+ Google Lighthouse mobile score</div>
+                </div>
+            </div>
+
+            <!-- Metric 3: Zero Commission -->
+            <div class="col-6 col-lg-3">
+                <div class="card glass-card rounded-3xl p-3 p-md-4 h-100 hover-lift">
+                    <div class="kpi-icon-box bg-warning-subtle text-warning">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="h2 fw-black text-warning mb-1 heading-font">0% Fee</div>
+                    <div class="small fw-bold text-body-secondary">Platform Commissions</div>
+                    <div class="text-secondary mt-1" style="font-size: 11px;">100% of revenue goes directly to your bank</div>
+                </div>
+            </div>
+
+            <!-- Metric 4: Turnaround -->
+            <div class="col-6 col-lg-3">
+                <div class="card glass-card rounded-3xl p-3 p-md-4 h-100 hover-lift">
+                    <div class="kpi-icon-box bg-primary-subtle text-primary">
+                        <i class="bi bi-rocket-takeoff-fill"></i>
+                    </div>
+                    <div class="h2 fw-black text-primary mb-1 heading-font">14 Days</div>
+                    <div class="small fw-bold text-body-secondary">Rapid Turnaround</div>
+                    <div class="text-secondary mt-1" style="font-size: 11px;">From contract signoff to live production</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Industry Filter Navigation Tabs -->
+    <section class="container py-4 text-center" id="projects">
+        <div class="d-flex flex-wrap align-items-center justify-content-center gap-2" id="portfolioFilterGroup">
+            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3.5 py-2 fw-bold active filter-btn" data-filter="all">
+                <i class="bi bi-grid-fill me-1.5"></i>
+                All Case Studies ({{ items|length }})
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3.5 py-2 fw-semibold filter-btn" data-filter="restaurant">
+                <i class="bi bi-cup-hot-fill me-1.5 text-danger"></i>
+                Restaurant &amp; WhatsApp POS
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3.5 py-2 fw-semibold filter-btn" data-filter="healthcare">
+                <i class="bi bi-hospital-fill me-1.5 text-info"></i>
+                Healthcare &amp; Dental
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3.5 py-2 fw-semibold filter-btn" data-filter="real estate">
+                <i class="bi bi-buildings-fill me-1.5 text-warning"></i>
+                Luxury Real Estate
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3.5 py-2 fw-semibold filter-btn" data-filter="ecommerce">
+                <i class="bi bi-bag-check-fill me-1.5 text-success"></i>
+                E-Commerce &amp; Retail
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3.5 py-2 fw-semibold filter-btn" data-filter="corporate">
+                <i class="bi bi-briefcase-fill me-1.5 text-primary"></i>
+                Corporate &amp; Legal
+            </button>
+        </div>
+    </section>
+
+    <!-- 100% Dynamic Case Studies & Portfolio Projects Grid -->
+    <section class="container py-4">
+        <div class="row g-4" id="portfolioGrid">
+
+            {% for item in items %}
+            <div class="col-md-6 col-lg-4 portfolio-item-col" data-category="{{ item.industry|lower }}">
+                <div class="card glass-card rounded-4xl overflow-hidden h-100 hover-lift d-flex flex-column">
+                    <!-- Browser Mockup Chrome -->
+                    <div class="mockup-header">
+                        <span class="mockup-dot mockup-dot-red"></span>
+                        <span class="mockup-dot mockup-dot-yellow"></span>
+                        <span class="mockup-dot mockup-dot-green"></span>
+                        <div class="mockup-address-bar">
+                            <i class="bi bi-lock-fill me-1" style="font-size: 8px;"></i>
+                            {{ item.clean_domain }}
+                        </div>
+                    </div>
+
+                    <!-- Project Visual Mockup Banner -->
+                    <div class="position-relative mockup-cover" 
+                         style="height: 205px; {% if not item.cover %}background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);{% endif %}">
+                        {% if item.cover %}
+                        <img src="{{ item.cover }}" alt="{{ item.title }}" class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                        <div class="position-absolute inset-0 d-flex flex-column justify-content-center align-items-center text-center p-3 text-white">
+                            <span class="badge rounded-pill bg-success px-3 py-1 fw-bold mb-2 shadow-sm text-uppercase" style="font-size: 10px;">
+                                <i class="bi bi-lightning-charge-fill me-1"></i> {{ item.badge_text|default:item.industry }}
+                            </span>
+                            <h4 class="fw-black mb-1 heading-font text-white">{{ item.client_name|default:item.title }}</h4>
+                            <p class="small text-white-50 mb-0">{{ item.industry }} Web System</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Card Body Details -->
+                    <div class="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 fw-bold text-uppercase" style="font-size: 10px;">
+                                    {{ item.industry|default:"Web Solution" }}
+                                </span>
+                                {% if item.results %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold" style="font-size: 10px;">
+                                    {{ item.results }}
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <h5 class="card-title fw-bold text-body mb-2 lh-sm">{{ item.title }}</h5>
+                            <p class="card-text text-body-secondary small mb-3" style="line-height: 1.6;">
+                                {{ item.description }}
+                            </p>
+
+                            <!-- Tech Stack Pills -->
+                            <div class="d-flex flex-wrap gap-1.5 mb-3">
+                                {% for tech in item.tech_list %}
+                                <span class="tech-pill">
+                                    <i class="bi bi-check2-circle text-primary"></i>
+                                    {{ tech }}
+                                </span>
+                                {% empty %}
+                                <span class="tech-pill"><i class="bi bi-lightning text-warning"></i> Next.js 14</span>
+                                <span class="tech-pill"><i class="bi bi-phone text-info"></i> WhatsApp API</span>
+                                <span class="tech-pill"><i class="bi bi-credit-card text-success"></i> Stripe Connect</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Card Action Footer -->
+                        <div class="pt-3 border-top mt-auto d-flex flex-column gap-2">
+                            <!-- Tier 1: Prominent WhatsApp Button -->
+                            <a href="https://wa.me/{{ agency.whatsapp_number|default:'923062180602' }}?text={{ 'Hi, I saw '|urlencode }}{{ item.title|urlencode }}{{ ' and would like a quote for my business'|urlencode }}" 
+                               target="_blank" 
+                               rel="noopener" 
+                               class="btn btn-whatsapp rounded-2xl py-2 px-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm text-nowrap">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                </svg>
+                                <span>Get Similar Website (WhatsApp)</span>
+                            </a>
+
+                            <!-- Tier 2: Live Demo & View Specs Buttons -->
+                            <div class="d-flex align-items-center gap-2">
+                                {% if item.live_url %}
+                                <a href="{{ item.live_url }}" 
+                                   target="_blank" 
+                                   rel="noopener" 
+                                   class="btn btn-sm btn-outline-primary rounded-xl py-1.5 flex-fill fw-bold d-inline-flex align-items-center justify-content-center gap-1.5 text-nowrap">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                    <span>Live Demo</span>
+                                </a>
+                                {% endif %}
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-secondary rounded-xl py-1.5 flex-fill fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 text-nowrap"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#instantQuoteModal"
+                                        data-service="{{ item.title }}">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span>View Specs</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="card glass-card rounded-4xl p-5 text-center">
+                    <i class="bi bi-briefcase text-primary fs-1 mb-2"></i>
+                    <h4 class="fw-bold text-body">No Case Studies Published Yet</h4>
+                    <p class="text-body-secondary small mb-3">Add case studies from your dashboard to showcase your agency work here.</p>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </section>
+
+    <!-- Why Businesses Choose Us -->
+    <section class="container py-5 my-4" id="capabilities">
+        <div class="text-center mb-5" style="max-width: 680px; margin: 0 auto;">
+            <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5 fw-bold text-uppercase mb-2" style="font-size: 11px;">
+                THE UNFAIR ADVANTAGE
+            </span>
+            <h2 class="display-6 fw-black text-body heading-font">Why Local Businesses Switch to Our Web Systems</h2>
+            <p class="text-body-secondary">
+                Standard brochure websites sit inactive on the web. We build active revenue machines that capture customers directly on their phones.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-md-4">
+                <div class="card glass-card rounded-4xl p-4 h-100 hover-lift">
+                    <div class="kpi-icon-box bg-danger-subtle text-danger">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <h4 class="fw-bold text-body mb-2 heading-font">0% Platform Commissions</h4>
+                    <p class="text-body-secondary small mb-0">
+                        Stop surrendering 20% to 35% of every food order or booking to delivery aggregators. Every sale made through your direct website goes 100% straight to your account.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-md-4">
+                <div class="card glass-card rounded-4xl p-4 h-100 hover-lift">
+                    <div class="kpi-icon-box bg-success-subtle text-success">
+                        <i class="bi bi-whatsapp"></i>
+                    </div>
+                    <h4 class="fw-bold text-body mb-2 heading-font">1-Click WhatsApp Ordering</h4>
+                    <p class="text-body-secondary small mb-0">
+                        Customers hate downloading clunky 80MB mobile apps or creating accounts. Our websites send orders and bookings straight to your WhatsApp in a single click with zero friction.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-md-4">
+                <div class="card glass-card rounded-4xl p-4 h-100 hover-lift">
+                    <div class="kpi-icon-box bg-info-subtle text-info">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <h4 class="fw-bold text-body mb-2 heading-font">Sub-Second Mobile Speeds</h4>
+                    <p class="text-body-secondary small mb-0">
+                        53% of mobile visitors abandon a website that takes over 3 seconds to load. Our modern architecture loads in 0.6 seconds, keeping every single customer engaged.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3-Step Simple Process Timeline -->
+    <section class="container py-5 my-4" id="process">
+        <div class="card glass-card rounded-4xl p-4 p-md-5">
+            <div class="text-center mb-5" style="max-width: 640px; margin: 0 auto;">
+                <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle px-3 py-1.5 fw-bold text-uppercase mb-2" style="font-size: 11px;">
+                    SEAMLESS IMPLEMENTATION
+                </span>
+                <h2 class="display-6 fw-black text-body heading-font">From Concept to Live in 14 Days</h2>
+                <p class="text-body-secondary">
+                    A frictionless, done-for-you execution process with zero technical stress on your team.
+                </p>
+            </div>
+
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <div class="rounded-circle bg-primary-subtle text-primary fw-black fs-4 d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
+                            1
+                        </div>
+                        <h5 class="fw-bold text-body mb-2">Audit &amp; Prototype</h5>
+                        <p class="text-body-secondary small">
+                            We analyze your current conversion leaks, create an interactive mobile prototype, and approve the ordering workflow.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <div class="rounded-circle bg-info-subtle text-info fw-black fs-4 d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
+                            2
+                        </div>
+                        <h5 class="fw-bold text-body mb-2">High-Speed Build</h5>
+                        <p class="text-body-secondary small">
+                            We configure your WhatsApp integration, menu or booking engine, payment gateways, and optimize for 98+ Google Lighthouse performance.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <div class="rounded-circle bg-success-subtle text-success fw-black fs-4 d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
+                            3
+                        </div>
+                        <h5 class="fw-bold text-body mb-2">Launch &amp; Direct Revenue</h5>
+                        <p class="text-body-secondary small">
+                            We deploy your domain, train your staff in 15 minutes, and activate QR codes on your tables or marketing collateral.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Client Testimonials & Feedback (100% Dynamic from Settings / DB) -->
+    <section class="container py-4 my-4" id="reviews">
+        <div class="text-center mb-5" style="max-width: 640px; margin: 0 auto;">
+            <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-1.5 fw-bold text-uppercase mb-2" style="font-size: 11px;">
+                VERIFIED CLIENT FEEDBACK
+            </span>
+            <h2 class="display-6 fw-black text-body heading-font">What Founders Say About Working With Us</h2>
+        </div>
+
+        <div class="row g-4">
+            {% for t in testimonials %}
+            <div class="col-md-4">
+                <div class="card glass-card rounded-4xl p-4 h-100 hover-lift d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="text-warning fs-6">
+                                {% for i in "12345" %}
+                                <i class="bi bi-star-fill"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.5" style="font-size: 10px;">
+                                Verified Client
+                            </span>
+                        </div>
+                        <p class="text-body-secondary small fst-italic mb-3" style="line-height: 1.6;">
+                            &ldquo;{{ t.quote }}&rdquo;
+                        </p>
+                    </div>
+                    <div class="d-flex align-items-center gap-2.5 pt-3 border-top mt-auto">
+                        <div class="rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center shrink-0" style="width: 40px; height: 40px; font-size: 14px;">
+                            {{ t.author|slice:":2"|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-bold text-body small">{{ t.author }}</div>
+                            <div class="text-secondary" style="font-size: 11px;">{{ t.role_display }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-4">
+                <p class="text-muted">No testimonials added yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Frequently Asked Questions (100% Dynamic from Settings / DB) -->
+    <section class="container py-5 my-4" id="faq" style="max-width: 880px;">
+        <div class="text-center mb-5">
+            <span class="badge rounded-pill bg-info-subtle text-info border border-info-subtle px-3 py-1.5 fw-bold text-uppercase mb-2" style="font-size: 11px;">
+                FREQUENTLY ASKED QUESTIONS
+            </span>
+            <h2 class="display-6 fw-black text-body heading-font">Everything You Need to Know</h2>
+            <p class="text-body-secondary">Honest, clear answers about our web engineering process &amp; deliverables.</p>
+        </div>
+
+        <div class="accordion agency-accordion" id="agencyFaqAccordion">
+            {% for faq in faqs %}
+            <div class="accordion-item glass-card">
+                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %} text-body d-flex align-items-center gap-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ forloop.counter }}">
+                        <span class="badge rounded-pill bg-primary-subtle text-primary px-2.5 py-1 text-xs">Q{{ forloop.counter }}</span>
+                        <span class="flex-grow-1">{{ faq.question }}</span>
+                    </button>
+                </h2>
+                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#agencyFaqAccordion">
+                    <div class="accordion-body text-body-secondary small ps-5" style="line-height: 1.7;">
+                        {{ faq.answer }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-4">
+                <p class="text-muted">No FAQs added yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Closing Call To Action Banner -->
+    <section class="container py-5 my-4">
+        <div class="card rounded-4xl p-5 text-center text-white position-relative overflow-hidden shadow-2xl" 
+             style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, var(--brand-primary) 100%);">
+            <div class="position-relative z-1" style="max-width: 740px; margin: 0 auto;">
+                <span class="badge rounded-pill bg-white/20 text-white border border-white/30 px-3.5 py-1.5 fw-bold text-uppercase mb-3" style="font-size: 11px;">
+                    READY TO UPGRADE?
+                </span>
+                <h2 class="display-5 fw-black mb-3 heading-font text-white">
+                    Stop Losing 30% to Aggregators. Start Converting Customers Directly.
+                </h2>
+                <p class="lead text-white-50 mb-4" style="font-size: 1.15rem;">
+                    Schedule a 15-minute discovery consultation. We will show you an interactive prototype designed specifically for your business.
+                </p>
+
+                <div class="d-flex flex-wrap align-items-center justify-content-center gap-3">
+                    {% if whatsapp_url or agency.whatsapp_number %}
+                    <a href="{{ whatsapp_url|default:'https://wa.me/923062180602' }}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-lg rounded-2xl px-4 py-3 d-inline-flex align-items-center gap-2 shadow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        </svg>
+                        <span>Chat on WhatsApp Now</span>
+                    </a>
+                    {% endif %}
+
+                    {% if contact_email %}
+                    <a href="mailto:{{ contact_email }}" class="btn btn-outline-light btn-lg rounded-2xl px-4 py-3 fw-bold d-inline-flex align-items-center gap-2">
+                        <i class="bi bi-envelope-fill"></i>
+                        <span>Send Official Email</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Agency Footer -->
+    <footer class="container py-4 border-top mt-5">
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 text-secondary small">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold text-body">{{ agency.display_agency_name }}</span>
+                <span>&bull;</span>
+                <span>High-Performance Web Solutions</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                {% if agency.whatsapp_number %}
+                <a href="https://wa.me/{{ agency.whatsapp_number }}" target="_blank" class="text-secondary text-decoration-none hover-lift">
+                    <i class="bi bi-whatsapp text-success me-1"></i> WhatsApp
+                </a>
+                {% endif %}
+                {% if contact_email %}
+                <a href="mailto:{{ contact_email }}" class="text-secondary text-decoration-none hover-lift">
+                    <i class="bi bi-envelope text-primary me-1"></i> {{ contact_email }}
+                </a>
+                {% endif %}
+                <span class="badge bg-body-secondary text-body-secondary border rounded-pill px-2.5 py-1">256-Bit SSL Encrypted</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Instant Quote Modal -->
+    <div class="modal fade" id="instantQuoteModal" tabindex="-1" aria-labelledby="instantQuoteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card rounded-4xl p-2 p-md-3">
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h5 class="modal-title fw-black text-body heading-font" id="instantQuoteModalLabel">Get Instant Project Quote</h5>
+                        <p class="small text-body-secondary mb-0">Fill in your business details for an immediate WhatsApp quotation.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <form id="quoteModalForm">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-body-secondary">Your Business Name</label>
+                            <input type="text" id="quoteBizName" class="form-control rounded-2xl" placeholder="e.g. Saffron Bistro / Lumina Dental" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-body-secondary">Service / Case Study Selected</label>
+                            <select id="quoteServiceSelect" class="form-select rounded-2xl">
+                                {% for item in items %}
+                                <option value="{{ item.title }}" {% if forloop.first %}selected{% endif %}>{{ item.title }} ({{ item.industry }})</option>
+                                {% endfor %}
+                                <option value="Custom High-Converting Web Solution">Custom High-Converting Web Solution</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-body-secondary">Your WhatsApp / Phone Number</label>
+                            <input type="text" id="quotePhone" class="form-control rounded-2xl" placeholder="e.g. +971 50 123 4567 or 0300 1234567">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-body-secondary">Project Details / Goals (Optional)</label>
+                            <textarea id="quoteNotes" class="form-control rounded-2xl" rows="3" placeholder="Tell us about your requirements, current website, or target launch date..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-whatsapp w-100 rounded-2xl py-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow">
+                            <i class="bi bi-whatsapp fs-5"></i>
+                            <span>Send &amp; Receive Instant Quote</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Sticky WhatsApp Button -->
+    {% if whatsapp_url or agency.whatsapp_number %}
+    <a href="{{ whatsapp_url|default:'https://wa.me/923062180602' }}" 
+       target="_blank" 
+       rel="noopener" 
+       class="floating-whatsapp"
+       title="Chat with {{ agency.display_agency_name }} on WhatsApp">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        <span>Instant WhatsApp</span>
+    </a>
+    {% endif %}
+
+    <!-- Bootstrap 5.3.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <script>
+        // 1. Theme Management (Sync with localStorage)
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeSunIcon = document.getElementById('themeSunIcon');
+        const themeMoonIcon = document.getElementById('themeMoonIcon');
+
+        function updateThemeIcons(currentTheme) {
+            if (currentTheme === 'light') {
+                themeSunIcon.classList.remove('d-none');
+                themeMoonIcon.classList.add('d-none');
+            } else {
+                themeSunIcon.classList.add('d-none');
+                themeMoonIcon.classList.remove('d-none');
+            }
+        }
+
+        updateThemeIcons(document.documentElement.getAttribute('data-bs-theme'));
+
+        themeToggleBtn.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcons(newTheme);
+        });
+
+        // 2. Interactive Category Filter
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const portfolioItems = document.querySelectorAll('.portfolio-item-col');
+
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterButtons.forEach(b => {
+                    b.classList.remove('btn-primary', 'active');
+                    b.classList.add('btn-outline-secondary');
+                });
+                this.classList.remove('btn-outline-secondary');
+                this.classList.add('btn-primary', 'active');
+
+                const filterValue = this.getAttribute('data-filter');
+
+                portfolioItems.forEach(item => {
+                    const itemCat = (item.getAttribute('data-category') || '').toLowerCase();
+                    if (filterValue === 'all' || itemCat.includes(filterValue) || filterValue.includes(itemCat)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // 3. Modal Service Preset Handlers
+        const instantQuoteModalEl = document.getElementById('instantQuoteModal');
+        if (instantQuoteModalEl) {
+            instantQuoteModalEl.addEventListener('show.bs.modal', function(event) {
+                const triggerBtn = event.relatedTarget;
+                if (triggerBtn && triggerBtn.getAttribute('data-service')) {
+                    const svc = triggerBtn.getAttribute('data-service');
+                    const selectEl = document.getElementById('quoteServiceSelect');
+                    if (selectEl) {
+                        for (let opt of selectEl.options) {
+                            if (opt.value.toLowerCase().includes(svc.toLowerCase()) || svc.toLowerCase().includes(opt.value.toLowerCase())) {
+                                opt.selected = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 4. Quote Form Submission -> Formats WhatsApp Message
+        const quoteModalForm = document.getElementById('quoteModalForm');
+        if (quoteModalForm) {
+            quoteModalForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const bizName = document.getElementById('quoteBizName').value || 'My Business';
+                const service = document.getElementById('quoteServiceSelect').value;
+                const phone = document.getElementById('quotePhone').value || 'Not provided';
+                const notes = document.getElementById('quoteNotes').value || 'Standard specification';
+
+                const agencyPhone = '{{ agency.whatsapp_number|default:"03062180602" }}'.replace(/[^0-9]/g, '');
+                const cleanPhone = agencyPhone.startsWith('0') ? '92' + agencyPhone.slice(1) : agencyPhone;
+
+                const msg = `Hi {{ agency.display_agency_name }}, I saw your portfolio and would like a quote for:\n\n*Business:* ${bizName}\n*Service:* ${service}\n*Contact:* ${phone}\n*Notes:* ${notes}\n\nPlease share availability and quotation.`;
+                
+                window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+
+                const modalInstance = bootstrap.Modal.getInstance(instantQuoteModalEl);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

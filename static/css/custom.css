@@ -1,0 +1,15 @@
+/* LeadRadar AI Custom Styles */
+@media print {
+    body {
+        background-color: white !important;
+        color: black !important;
+    }
+    aside, header, .no-print {
+        display: none !important;
+    }
+    #proposal-paper {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+}

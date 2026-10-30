@@ -1,0 +1,104 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Email Pitch &amp; Proposal Templates — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="space-y-6 w-full">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Email Pitch &amp; Proposal Templates</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">Design, customize, and save high-converting message templates with dynamic client tags</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'outreach:template_create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Create New Template</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Supported Variables Info Banner -->
+    <div class="p-5 rounded-3xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/90 dark:border-indigo-800/60 text-xs text-indigo-950 dark:text-indigo-200 flex items-start gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            </svg>
+        </div>
+        <div class="space-y-1.5 flex-1">
+            <div class="font-extrabold text-slate-900 dark:text-white text-sm">Dynamic Merge Tags Supported</div>
+            <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-xs">
+                You can insert
+                <code class="px-1.5 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold">&#123;&#123;business_name&#125;&#125;</code>,
+                <code class="px-1.5 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold">&#123;&#123;website&#125;&#125;</code>,
+                <code class="px-1.5 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold">&#123;&#123;city&#125;&#125;</code>,
+                <code class="px-1.5 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold">&#123;&#123;industry&#125;&#125;</code>,
+                <code class="px-1.5 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold">&#123;&#123;sender_name&#125;&#125;</code>,
+                <code class="px-1.5 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold">&#123;&#123;proposal_link&#125;&#125;</code>
+                into any pitch. LeadRadar will auto-fill them when emailing any prospect!
+            </p>
+        </div>
+    </div>
+
+    <!-- Templates Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for t in templates %}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm dark:shadow-xl space-y-4 hover:border-indigo-400 dark:hover:border-slate-700 transition flex flex-col justify-between">
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30">
+                        {{ t.category }}
+                    </span>
+                    {% if t.is_default %}
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30">
+                        Default
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white">{{ t.name }}</h3>
+                    <div class="text-xs text-indigo-600 dark:text-indigo-400 font-medium mt-1 truncate">
+                        <span class="text-slate-500 dark:text-slate-400">Subject:</span> {{ t.subject }}
+                    </div>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 font-mono text-[11px] text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed max-h-44 overflow-y-auto border border-slate-200/80 dark:border-slate-800/80">
+{{ t.body }}
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
+                <span class="text-slate-500 dark:text-slate-400">Updated {{ t.updated_at|date:"M d" }}</span>
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'outreach:template_edit' pk=t.id %}" class="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-700 dark:text-slate-200 font-bold transition">
+                        Edit
+                    </a>
+                    <a href="{% url 'outreach:template_delete' pk=t.id %}" onclick="return confirm('Delete template {{ t.name }}?');" class="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white border border-rose-200 dark:border-rose-900/60 transition" title="Delete">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 text-center py-16 bg-white dark:bg-slate-900/40 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-8">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3 text-indigo-500">
+                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">No email templates created yet</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">Create cold pitch or proposal templates to streamline agency outreach.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

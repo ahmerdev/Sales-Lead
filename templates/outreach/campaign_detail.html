@@ -1,0 +1,94 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ campaign.name }} — Campaign Review{% endblock %}
+
+{% block content %}
+<div class="space-y-6 w-full">
+    <!-- Header Card -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-7 rounded-3xl shadow-sm dark:shadow-xl">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30">
+                    {{ campaign.industry_target }}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    {{ campaign.get_status_display }}
+                </span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2">{{ campaign.name }}</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">Review AI cold pitches, verify personalization, and approve email dispatches.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'outreach:campaigns' %}" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition shadow-sm">
+                &larr; All Campaigns
+            </a>
+        </div>
+    </div>
+
+    <!-- Approval Queue -->
+    <div class="space-y-4">
+        {% for cl in campaign_leads %}
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-7 shadow-sm dark:shadow-xl space-y-4" x-data="{ expanded: false }">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <a href="{% url 'leads:detail' pk=cl.lead.id %}" class="text-base font-extrabold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                            {{ cl.lead.business_name }}
+                        </a>
+                        <span class="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 px-2 py-0.5 rounded-full font-extrabold">
+                            Score {{ cl.lead.opportunity_score }}
+                        </span>
+                    </div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {{ cl.lead.email|default:"No email provided" }} &bull; {{ cl.lead.city }}
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold
+                        {% if cl.status == 'SENT' %}bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30
+                        {% elif cl.status == 'INTERESTED' %}bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30
+                        {% else %}bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700{% endif %}">
+                        {{ cl.get_status_display }}
+                    </span>
+
+                    {% if cl.status == 'PREPARED' %}
+                    <a href="{% url 'outreach:mark_sent' campaign_id=campaign.id lead_id=cl.lead.id %}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                        Approve &amp; Mark Sent
+                    </a>
+                    {% endif %}
+
+                    <button @click="expanded = !expanded" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="expanded ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pitch Preview -->
+            {% if cl.pitch %}
+            <div class="space-y-2">
+                <div class="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Subject: <span class="text-slate-900 dark:text-white font-extrabold">{{ cl.pitch.subject }}</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 font-mono text-xs text-slate-800 dark:text-slate-200 whitespace-pre-line border border-slate-200/80 dark:border-slate-800 leading-relaxed">
+{{ cl.pitch.email_body }}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-xs text-slate-500 italic">No pitch generated yet.</div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="text-center py-14 bg-white dark:bg-slate-900/40 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-8">
+            <p class="text-xs text-slate-500 dark:text-slate-400">No leads attached to this campaign.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

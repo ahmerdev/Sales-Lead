@@ -1,0 +1,568 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Targeted Lead Discovery Engine — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="w-full space-y-8" 
+     x-data="{
+        countrySearch: '',
+        isCountryOpen: false,
+        selectedCountry: 'United Arab Emirates',
+        selectedCountryFlag: '🇦🇪',
+
+        citySearch: '',
+        isCityOpen: false,
+        selectedCity: 'Dubai',
+        isCustomCity: false,
+        customCityText: '',
+
+        selectedIndustry: 'Restaurant',
+        leadCount: '10',
+        isScanning: false,
+        scanStep: 1,
+
+        countries: [
+            { name: 'Pakistan', flag: '🇵🇰', cities: ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad', 'Multan', 'Peshawar', 'Quetta', 'Sialkot', 'Gujranwala', 'Hyderabad', 'Abbottabad', 'Bahawalpur', 'Sargodha', 'Sukkur'] },
+            { name: 'United Arab Emirates', flag: '🇦🇪', cities: ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain', 'Al Ain'] },
+            { name: 'Saudi Arabia', flag: '🇸🇦', cities: ['Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar', 'Dhahran', 'Tabuk', 'Taif', 'Jubail', 'Abha', 'Yanbu'] },
+            { name: 'United States', flag: '🇺🇸', cities: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'Austin', 'San Jose', 'Miami', 'Atlanta', 'Seattle', 'Boston', 'Denver', 'Las Vegas'] },
+            { name: 'United Kingdom', flag: '🇬🇧', cities: ['London', 'Manchester', 'Birmingham', 'Leeds', 'Glasgow', 'Liverpool', 'Edinburgh', 'Bristol', 'Sheffield', 'Newcastle', 'Belfast', 'Cardiff', 'Nottingham'] },
+            { name: 'Canada', flag: '🇨🇦', cities: ['Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa', 'Edmonton', 'Mississauga', 'Winnipeg', 'Quebec City', 'Hamilton', 'Brampton', 'Surrey'] },
+            { name: 'Australia', flag: '🇦🇺', cities: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Gold Coast', 'Canberra', 'Newcastle', 'Wollongong', 'Hobart'] },
+            { name: 'Qatar', flag: '🇶🇦', cities: ['Doha', 'Al Rayyan', 'Al Wakrah', 'Al Khor', 'Lusail', 'Umm Salal'] },
+            { name: 'Kuwait', flag: '🇰🇼', cities: ['Kuwait City', 'Hawally', 'Salmiya', 'Al Ahmadi', 'Farwaniya', 'Al Jahra'] },
+            { name: 'Oman', flag: '🇴🇲', cities: ['Muscat', 'Salalah', 'Sohar', 'Nizwa', 'Sur', 'Seeb', 'Barka'] },
+            { name: 'Bahrain', flag: '🇧🇭', cities: ['Manama', 'Riffa', 'Muharraq', 'Hamad Town', 'A\'ali', 'Isa Town'] },
+            { name: 'India', flag: '🇮🇳', cities: ['Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat', 'Lucknow', 'Chandigarh', 'Kochi'] },
+            { name: 'Germany', flag: '🇩🇪', cities: ['Berlin', 'Munich', 'Frankfurt', 'Hamburg', 'Cologne', 'Stuttgart', 'Düsseldorf', 'Leipzig', 'Dortmund', 'Essen'] },
+            { name: 'Turkey', flag: '🇹🇷', cities: ['Istanbul', 'Ankara', 'Izmir', 'Antalya', 'Bursa', 'Adana', 'Gaziantep', 'Konya', 'Bodrum'] },
+            { name: 'France', flag: '🇫🇷', cities: ['Paris', 'Marseille', 'Lyon', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Bordeaux'] },
+            { name: 'Spain', flag: '🇪🇸', cities: ['Madrid', 'Barcelona', 'Valencia', 'Seville', 'Zaragoza', 'Malaga', 'Murcia', 'Palma', 'Bilbao'] },
+            { name: 'Italy', flag: '🇮🇹', cities: ['Rome', 'Milan', 'Naples', 'Turin', 'Palermo', 'Genoa', 'Bologna', 'Florence', 'Venice'] },
+            { name: 'Netherlands', flag: '🇳🇱', cities: ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht', 'Eindhoven', 'Groningen', 'Tilburg'] },
+            { name: 'Singapore', flag: '🇸🇬', cities: ['Singapore Central', 'Marina Bay', 'Jurong', 'Tampines', 'Woodlands', 'Bedok'] },
+            { name: 'Malaysia', flag: '🇲🇾', cities: ['Kuala Lumpur', 'George Town', 'Johor Bahru', 'Petaling Jaya', 'Shah Alam', 'Ipoh', 'Malacca'] },
+            { name: 'South Africa', flag: '🇿🇦', cities: ['Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Port Elizabeth', 'Bloemfontein'] },
+            { name: 'Egypt', flag: '🇪🇬', cities: ['Cairo', 'Alexandria', 'Giza', 'Shubra El Kheima', 'Port Said', 'Suez', 'Mansoura', 'Luxor', 'Sharm El Sheikh'] },
+            { name: 'Brazil', flag: '🇧🇷', cities: ['São Paulo', 'Rio de Janeiro', 'Brasília', 'Salvador', 'Fortaleza', 'Belo Horizonte', 'Curitiba'] },
+            { name: 'Indonesia', flag: '🇮🇩', cities: ['Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Bekasi', 'Semarang', 'Tangerang', 'Bali (Denpasar)'] },
+            { name: 'Bangladesh', flag: '🇧🇩', cities: ['Dhaka', 'Chittagong', 'Khulna', 'Rajshahi', 'Sylhet', 'Bogura', 'Comilla'] },
+            { name: 'Ireland', flag: '🇮🇪', cities: ['Dublin', 'Cork', 'Galway', 'Limerick', 'Waterford', 'Drogheda'] },
+            { name: 'Switzerland', flag: '🇨🇭', cities: ['Zurich', 'Geneva', 'Basel', 'Lausanne', 'Bern', 'Lucerne', 'Lugano'] },
+            { name: 'Sweden', flag: '🇸🇪', cities: ['Stockholm', 'Gothenburg', 'Malmö', 'Uppsala', 'Västerås', 'Örebro'] },
+            { name: 'Norway', flag: '🇳🇴', cities: ['Oslo', 'Bergen', 'Trondheim', 'Stavanger', 'Drammen', 'Tromsø'] },
+            { name: 'New Zealand', flag: '🇳🇿', cities: ['Auckland', 'Wellington', 'Christchurch', 'Hamilton', 'Tauranga', 'Dunedin'] },
+            { name: 'Japan', flag: '🇯🇵', cities: ['Tokyo', 'Osaka', 'Kyoto', 'Yokohama', 'Nagoya', 'Sapporo', 'Fukuoka', 'Kobe'] },
+            { name: 'South Korea', flag: '🇰🇷', cities: ['Seoul', 'Busan', 'Incheon', 'Daegu', 'Daejeon', 'Gwangju', 'Suwon'] }
+        ],
+
+        get currentCountryObj() {
+            return this.countries.find(c => c.name.toLowerCase() === this.selectedCountry.toLowerCase()) || this.countries[0];
+        },
+
+        get filteredCountries() {
+            if (!this.countrySearch.trim()) return this.countries;
+            const term = this.countrySearch.toLowerCase();
+            return this.countries.filter(c => c.name.toLowerCase().includes(term));
+        },
+
+        get currentCities() {
+            const countryObj = this.currentCountryObj;
+            return countryObj ? countryObj.cities : ['Default City'];
+        },
+
+        get filteredCities() {
+            if (!this.citySearch.trim()) return this.currentCities;
+            const term = this.citySearch.toLowerCase();
+            return this.currentCities.filter(c => c.toLowerCase().includes(term));
+        },
+
+        selectCountry(c) {
+            this.selectedCountry = c.name;
+            this.selectedCountryFlag = c.flag;
+            this.isCountryOpen = false;
+            this.countrySearch = '';
+            // Auto update to primary city of that country
+            this.selectedCity = c.cities[0] || 'Main City';
+            this.isCustomCity = false;
+            this.customCityText = '';
+            this.citySearch = '';
+        },
+
+        selectCity(city) {
+            this.selectedCity = city;
+            this.isCityOpen = false;
+            this.citySearch = '';
+            this.isCustomCity = false;
+        },
+
+        chooseCustomCity() {
+            this.isCustomCity = true;
+            this.isCityOpen = false;
+            this.$nextTick(() => {
+                if (this.$refs.customCityInput) this.$refs.customCityInput.focus();
+            });
+        },
+
+        startScan() {
+            this.isScanning = true;
+            this.scanStep = 1;
+            setInterval(() => {
+                if (this.scanStep < 4) this.scanStep++;
+            }, 1800);
+        }
+     }">
+
+    <!-- Radar Scanning Fullscreen Overlay -->
+    <div x-show="isScanning" 
+         x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-xl px-4">
+        <div class="max-w-md w-full bg-slate-900 border border-indigo-500/30 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden">
+            <!-- Ambient radar sweep -->
+            <div class="relative w-36 h-36 mx-auto mb-6 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border border-indigo-500/20 animate-ping"></div>
+                <div class="absolute inset-4 rounded-full border border-indigo-500/40"></div>
+                <div class="absolute inset-10 rounded-full border border-cyan-500/60"></div>
+                <div class="absolute w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400"></div>
+                <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-indigo-500/20 to-cyan-500/40 animate-spin" style="animation-duration: 2.5s;"></div>
+                <i data-lucide="radar" class="w-10 h-10 text-cyan-400 relative z-10 animate-pulse"></i>
+            </div>
+
+            <h3 class="text-xl font-black text-white tracking-tight">Active Radar Discovery</h3>
+            <p class="text-xs text-indigo-300 mt-1">
+                Targeting <span class="font-bold text-white" x-text="isCustomCity ? customCityText : selectedCity"></span>, 
+                <span class="font-bold text-white" x-text="selectedCountry"></span>
+            </p>
+
+            <!-- Sequential Step Ticker -->
+            <div class="mt-6 space-y-3 text-left">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs"
+                     :class="scanStep >= 1 ? 'text-emerald-400 border-emerald-500/40' : 'text-slate-500'">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 shrink-0" x-show="scanStep > 1"></i>
+                    <i data-lucide="loader" class="w-4 h-4 shrink-0 animate-spin text-indigo-400" x-show="scanStep === 1"></i>
+                    <span>1. Triangulating regional coordinates &amp; POIs</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs"
+                     :class="scanStep >= 2 ? 'text-emerald-400 border-emerald-500/40' : 'text-slate-500'">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 shrink-0" x-show="scanStep > 2"></i>
+                    <i data-lucide="loader" class="w-4 h-4 shrink-0 animate-spin text-indigo-400" x-show="scanStep === 2"></i>
+                    <i data-lucide="circle" class="w-4 h-4 shrink-0 text-slate-600" x-show="scanStep < 2"></i>
+                    <span>2. Discovering active business websites</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs"
+                     :class="scanStep >= 3 ? 'text-emerald-400 border-emerald-500/40' : 'text-slate-500'">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 shrink-0" x-show="scanStep > 3"></i>
+                    <i data-lucide="loader" class="w-4 h-4 shrink-0 animate-spin text-indigo-400" x-show="scanStep === 3"></i>
+                    <i data-lucide="circle" class="w-4 h-4 shrink-0 text-slate-600" x-show="scanStep < 3"></i>
+                    <span>3. Pinging live servers &amp; testing SSL status</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs"
+                     :class="scanStep >= 4 ? 'text-emerald-400 border-emerald-500/40' : 'text-slate-500'">
+                    <i data-lucide="loader" class="w-4 h-4 shrink-0 animate-spin text-cyan-400" x-show="scanStep === 4"></i>
+                    <i data-lucide="circle" class="w-4 h-4 shrink-0 text-slate-600" x-show="scanStep < 4"></i>
+                    <span>4. Extracting contact emails &amp; opportunity gaps</span>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 mt-5">Please hold on — filtering out dead domains and parked pages...</p>
+        </div>
+    </div>
+
+    <!-- Header Banner -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/25 mb-2.5">
+                <i data-lucide="radar" class="w-3.5 h-3.5 text-amber-500"></i>
+                Global Lead Discovery Engine
+            </div>
+            <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">Find Real Prospective Clients</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1.5 max-w-2xl">
+                Search verified local business databases across any country and city. Live websites are automatically checked, dead links are filtered, and contact details are extracted.
+            </p>
+        </div>
+        <a href="{% url 'leads:list' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs hover:border-slate-300 dark:hover:border-slate-700 transition shadow-sm self-start sm:self-center">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Back to Leads
+        </a>
+    </div>
+
+    <!-- Discovery Criteria Card -->
+    <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-xl backdrop-blur-2xl">
+        <form method="POST" action="{% url 'leads:find_leads' %}" @submit="startScan()" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Hidden Inputs Bound to Alpine state -->
+            <input type="hidden" name="country" :value="selectedCountry">
+            <input type="hidden" name="city" :value="isCustomCity ? customCityText : selectedCity">
+            <input type="hidden" name="industry" :value="selectedIndustry">
+            <input type="hidden" name="count" :value="leadCount">
+
+            <!-- Step 1: Country & Dependent City Selection -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <span class="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">1</span>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">Geographic Territory</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Searchable Country Dropdown -->
+                    <div class="relative" @click.outside="isCountryOpen = false">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
+                            <span>Select Country (Searchable)</span>
+                            <span class="text-[10px] text-slate-400 font-normal">All Global Countries</span>
+                        </label>
+                        
+                        <!-- Country Button / Trigger -->
+                        <button type="button" 
+                                @click="isCountryOpen = !isCountryOpen"
+                                class="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
+                            <span class="flex items-center gap-2.5">
+                                <span class="text-xl leading-none" x-text="selectedCountryFlag"></span>
+                                <span class="font-bold" x-text="selectedCountry"></span>
+                            </span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="isCountryOpen ? 'rotate-180' : ''"></i>
+                        </button>
+
+                        <!-- Country Dropdown Floating Panel -->
+                        <div x-show="isCountryOpen" 
+                             x-cloak
+                             class="absolute left-0 right-0 top-full mt-2 z-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 max-h-72 flex flex-col space-y-2">
+                            <!-- Instant Search Bar -->
+                            <div class="relative">
+                                <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400"></i>
+                                <input type="text" 
+                                       x-model="countrySearch" 
+                                       placeholder="Type country name..." 
+                                       class="w-full pl-8 pr-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            </div>
+
+                            <!-- List -->
+                            <div class="overflow-y-auto space-y-1 flex-1 pr-1">
+                                <template x-for="c in filteredCountries" :key="c.name">
+                                    <button type="button" 
+                                            @click="selectCountry(c)"
+                                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs hover:bg-indigo-50 dark:hover:bg-slate-800 text-left transition"
+                                            :class="selectedCountry === c.name ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-700 dark:text-slate-300'">
+                                        <span class="flex items-center gap-2">
+                                            <span class="text-base" x-text="c.flag"></span>
+                                            <span x-text="c.name"></span>
+                                        </span>
+                                        <i data-lucide="check" class="w-3.5 h-3.5 text-indigo-500" x-show="selectedCountry === c.name"></i>
+                                    </button>
+                                </template>
+                                <div x-show="filteredCountries.length === 0" class="text-xs text-slate-400 py-3 text-center">
+                                    No country matches your query
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dependent Dynamic City Dropdown -->
+                    <div class="relative" @click.outside="isCityOpen = false">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
+                            <span>Target City / Region</span>
+                            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold" x-text="'Cities in ' + selectedCountry"></span>
+                        </label>
+
+                        <!-- Standard City Selector Button -->
+                        <div x-show="!isCustomCity">
+                            <button type="button" 
+                                    @click="isCityOpen = !isCityOpen"
+                                    class="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition">
+                                <span class="flex items-center gap-2">
+                                    <i data-lucide="map-pin" class="w-4 h-4 text-indigo-500"></i>
+                                    <span class="font-bold" x-text="selectedCity"></span>
+                                </span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="isCityOpen ? 'rotate-180' : ''"></i>
+                            </button>
+                        </div>
+
+                        <!-- Custom City Input Mode -->
+                        <div x-show="isCustomCity" class="relative">
+                            <i data-lucide="map-pin" class="w-4 h-4 absolute left-3.5 top-3.5 text-indigo-500"></i>
+                            <input type="text" 
+                                   x-ref="customCityInput"
+                                   x-model="customCityText" 
+                                   placeholder="Type any city or town name..." 
+                                   class="w-full pl-10 pr-24 py-2.5 text-sm font-bold rounded-2xl bg-slate-50 dark:bg-slate-950 border-2 border-indigo-500 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none shadow-sm">
+                            <button type="button" 
+                                    @click="isCustomCity = false; selectedCity = currentCities[0]"
+                                    class="absolute right-2 top-2 px-2.5 py-1 text-[11px] font-bold rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900">
+                                Preset List
+                            </button>
+                        </div>
+
+                        <!-- City Dropdown Floating Panel -->
+                        <div x-show="isCityOpen && !isCustomCity" 
+                             x-cloak
+                             class="absolute left-0 right-0 top-full mt-2 z-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 max-h-72 flex flex-col space-y-2">
+                            <!-- Instant Search Bar -->
+                            <div class="relative">
+                                <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400"></i>
+                                <input type="text" 
+                                       x-model="citySearch" 
+                                       placeholder="Filter city..." 
+                                       class="w-full pl-8 pr-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            </div>
+
+                            <!-- City List -->
+                            <div class="overflow-y-auto space-y-1 flex-1 pr-1">
+                                <template x-for="city in filteredCities" :key="city">
+                                    <button type="button" 
+                                            @click="selectCity(city)"
+                                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs hover:bg-indigo-50 dark:hover:bg-slate-800 text-left transition"
+                                            :class="selectedCity === city ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-700 dark:text-slate-300'">
+                                        <span x-text="city"></span>
+                                        <i data-lucide="check" class="w-3.5 h-3.5 text-indigo-500" x-show="selectedCity === city"></i>
+                                    </button>
+                                </template>
+                                
+                                <!-- Custom City Option -->
+                                <button type="button" 
+                                        @click="chooseCustomCity()"
+                                        class="w-full mt-2 flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900 hover:bg-indigo-100/60 transition">
+                                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                                    <span>+ Enter Other / Custom City</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Target Industry Grid -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <span class="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">2</span>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">Business Category &amp; Industry</h2>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <!-- Restaurant -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Restaurant'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Restaurant' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-amber-500/15 text-amber-500">
+                            <i data-lucide="utensils" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Restaurants</div>
+                            <div class="text-[10px] text-slate-400">Cafes &amp; Dining</div>
+                        </div>
+                    </button>
+
+                    <!-- Dental -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Dental'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Dental' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-cyan-500/15 text-cyan-500">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Dental Clinics</div>
+                            <div class="text-[10px] text-slate-400">Oral Surgeons</div>
+                        </div>
+                    </button>
+
+                    <!-- Fitness -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Fitness'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Fitness' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-emerald-500/15 text-emerald-500">
+                            <i data-lucide="dumbbell" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Gyms &amp; Fitness</div>
+                            <div class="text-[10px] text-slate-400">Clubs &amp; Studios</div>
+                        </div>
+                    </button>
+
+                    <!-- Real Estate -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Real Estate'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Real Estate' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-violet-500/15 text-violet-500">
+                            <i data-lucide="building-2" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Real Estate</div>
+                            <div class="text-[10px] text-slate-400">Agencies &amp; Brokers</div>
+                        </div>
+                    </button>
+
+                    <!-- Healthcare -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Healthcare'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Healthcare' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-rose-500/15 text-rose-500">
+                            <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Healthcare</div>
+                            <div class="text-[10px] text-slate-400">Doctors &amp; Clinics</div>
+                        </div>
+                    </button>
+
+                    <!-- E-Commerce -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'E-Commerce'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'E-Commerce' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-blue-500/15 text-blue-500">
+                            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">E-Commerce</div>
+                            <div class="text-[10px] text-slate-400">Retail &amp; Brands</div>
+                        </div>
+                    </button>
+
+                    <!-- Legal -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Legal'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Legal' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-indigo-500/15 text-indigo-500">
+                            <i data-lucide="scale" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Legal &amp; Law</div>
+                            <div class="text-[10px] text-slate-400">Attorneys &amp; Firms</div>
+                        </div>
+                    </button>
+
+                    <!-- Hospitality -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Hospitality'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Hospitality' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-orange-500/15 text-orange-500">
+                            <i data-lucide="hotel" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Hospitality</div>
+                            <div class="text-[10px] text-slate-400">Hotels &amp; Resorts</div>
+                        </div>
+                    </button>
+
+                    <!-- Automotive -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Automotive'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Automotive' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-purple-500/15 text-purple-500">
+                            <i data-lucide="car" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Automotive</div>
+                            <div class="text-[10px] text-slate-400">Repair &amp; Sales</div>
+                        </div>
+                    </button>
+
+                    <!-- Home Services -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Home Services'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Home Services' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-yellow-500/15 text-yellow-500">
+                            <i data-lucide="wrench" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Home Services</div>
+                            <div class="text-[10px] text-slate-400">HVAC, Roofing, Plumber</div>
+                        </div>
+                    </button>
+
+                    <!-- Manufacturing -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Manufacturing'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Manufacturing' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-slate-500/15 text-slate-500">
+                            <i data-lucide="factory" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Manufacturing</div>
+                            <div class="text-[10px] text-slate-400">Industrial &amp; Plants</div>
+                        </div>
+                    </button>
+
+                    <!-- Other -->
+                    <button type="button" 
+                            @click="selectedIndustry = 'Other'"
+                            class="p-3.5 rounded-2xl border text-left transition flex items-center gap-3"
+                            :class="selectedIndustry === 'Other' ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        <span class="p-2 rounded-xl bg-teal-500/15 text-teal-500">
+                            <i data-lucide="briefcase" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <div class="font-bold text-xs">Other Agencies</div>
+                            <div class="text-[10px] text-slate-400">General Business</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Lead Quantity Controls -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <span class="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">3</span>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">Batch Size</h2>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <button type="button" 
+                            @click="leadCount = '5'"
+                            class="p-3 rounded-2xl border text-center transition font-bold text-xs"
+                            :class="leadCount === '5' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/30' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        5 Quick Leads
+                    </button>
+                    <button type="button" 
+                            @click="leadCount = '10'"
+                            class="p-3 rounded-2xl border text-center transition font-bold text-xs"
+                            :class="leadCount === '10' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/30' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        10 Recommended
+                    </button>
+                    <button type="button" 
+                            @click="leadCount = '25'"
+                            class="p-3 rounded-2xl border text-center transition font-bold text-xs"
+                            :class="leadCount === '25' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/30' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        25 Deep Scan
+                    </button>
+                    <button type="button" 
+                            @click="leadCount = '50'"
+                            class="p-3 rounded-2xl border text-center transition font-bold text-xs"
+                            :class="leadCount === '50' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/30' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
+                        50 Max Leads
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4">
+                <button type="submit" 
+                        class="w-full flex items-center justify-center gap-3 py-4 px-8 rounded-2xl text-sm sm:text-base font-extrabold text-white bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer">
+                    <i data-lucide="radar" class="w-5 h-5 text-amber-300 animate-spin" style="animation-duration: 4s;"></i>
+                    <span>Launch Radar &amp; Discover Real Leads</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Quick Tip & Blueprint Starter -->
+    <div class="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/90 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+        <div class="flex items-center gap-2.5">
+            <i data-lucide="info" class="w-4 h-4 text-indigo-500 shrink-0"></i>
+            <span>Want to test the full website audit &amp; AI proposal pipeline with the exact blueprint sample businesses?</span>
+        </div>
+        <a href="{% url 'leads:seed_samples' %}" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0">
+            Load Blueprint Demo Leads &rarr;
+        </a>
+    </div>
+</div>
+{% endblock %}

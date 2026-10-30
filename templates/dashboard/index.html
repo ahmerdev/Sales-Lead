@@ -1,0 +1,679 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="space-y-6 w-full" x-data="{
+    currency: 'USD',
+    currencyFlag: '🇺🇸',
+    currencySymbol: '$',
+    currencyOpen: false,
+    selectedRows: ['INV_000073'],
+    searchQuery: '',
+    toggleRow(id) {
+        if (this.selectedRows.includes(id)) {
+            this.selectedRows = this.selectedRows.filter(r => r !== id);
+        } else {
+            this.selectedRows.push(id);
+        }
+    },
+    setCurrency(curr, flag, sym) {
+        this.currency = curr;
+        this.currencyFlag = flag;
+        this.currencySymbol = sym;
+        this.currencyOpen = false;
+    }
+}">
+
+    <!-- Top Greeting Section (Matching exact screenshot title & subtitle) -->
+    <div class="space-y-1">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight heading-font">
+            Good morning, {{ user.full_name|default:"Sajibur" }}
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+            Stay on top of your tasks, monitor progress, and track status.
+        </p>
+    </div>
+
+    <!-- Main Dashboard 3-Column Asymmetric Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- ========================================== -->
+        <!-- LEFT COLUMN: Balance, Wallets, Limit & Cards -->
+        <!-- ========================================== -->
+        <div class="lg:col-span-4 space-y-5">
+            
+            <!-- Card 1: Total Balance & Wallets Box -->
+            <div class="rounded-[28px] bg-white dark:bg-[#111827] p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] space-y-5">
+                
+                <!-- Top Line: Title & Currency Selector -->
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Balance</span>
+                    
+                    <!-- Currency Dropdown Pill -->
+                    <div class="relative">
+                        <button @click="currencyOpen = !currencyOpen" 
+                                type="button" 
+                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-slate-300 transition shadow-sm">
+                            <span x-text="currencyFlag">🇺🇸</span>
+                            <span x-text="currency">USD</span>
+                            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+                        </button>
+                        
+                        <!-- Dropdown Options -->
+                        <div x-show="currencyOpen" 
+                             @click.away="currencyOpen = false" 
+                             x-cloak 
+                             class="absolute right-0 mt-2 w-32 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 p-1.5 shadow-xl z-30 text-xs space-y-1">
+                            <button type="button" @click="setCurrency('USD', '🇺🇸', '$')" class="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 font-bold flex items-center gap-2">
+                                <span>🇺🇸</span> USD ($)
+                            </button>
+                            <button type="button" @click="setCurrency('EUR', '🇩🇪', '€')" class="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 font-bold flex items-center gap-2">
+                                <span>🇩🇪</span> EUR (€)
+                            </button>
+                            <button type="button" @click="setCurrency('GBP', '🇬🇧', '£')" class="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 font-bold flex items-center gap-2">
+                                <span>🇬🇧</span> GBP (£)
+                            </button>
+                            <button type="button" @click="setCurrency('AED', '🇦🇪', 'AED')" class="w-full text-left px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 font-bold flex items-center gap-2">
+                                <span>🇦🇪</span> AED (AED)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Big Amount Headline -->
+                <div class="space-y-1">
+                    <div class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white heading-font tracking-tight">
+                        <span x-text="currencySymbol">$</span>{{ total_pipeline_val|default:"689,372.00" }}
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-500">
+                        <span>↑ 5%</span>
+                        <span class="text-slate-400 font-normal">than last month</span>
+                    </div>
+                </div>
+
+                <!-- Transfer / Request Two Pill Buttons -->
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'leads:find_leads' %}" 
+                       class="flex-1 py-3 px-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition hover:bg-slate-800">
+                        <!-- Transfer real arrows SVG -->
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m17 2 4 4-4 4"/>
+                            <path d="M3 6h18"/>
+                            <path d="m7 22-4-4 4-4"/>
+                            <path d="M21 18H3"/>
+                        </svg>
+                        <span>Transfer</span>
+                    </a>
+                    
+                    <a href="{% url 'leads:import_csv' %}" 
+                       class="flex-1 py-3 px-4 rounded-2xl bg-white dark:bg-[#1A2234] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition hover:bg-slate-50">
+                        <!-- Request SVG -->
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m7 15 5 5 5-5"/>
+                            <path d="m7 9 5-5 5 5"/>
+                        </svg>
+                        <span>Request</span>
+                    </a>
+                </div>
+
+                <!-- Sub-Wallets Section -->
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-3">
+                    <div class="text-[11px] font-bold text-slate-400 dark:text-slate-400">
+                        Wallets &bull; Total 6 wallets
+                    </div>
+
+                    <!-- 3 Horizontal Mini Wallet Cards -->
+                    <div class="grid grid-cols-3 gap-2 text-left">
+                        <!-- USD Wallet -->
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                <span class="flex items-center gap-1"><span>🇺🇸</span> USD</span>
+                                <span class="text-slate-400">&vellip;</span>
+                            </div>
+                            <div class="text-xs font-black text-slate-900 dark:text-white mt-1">$22,678.00</div>
+                            <div class="text-[9px] text-slate-400 leading-none">Limit is $10k a month</div>
+                            <div class="text-[9px] text-emerald-500 font-bold pt-0.5">Active</div>
+                        </div>
+
+                        <!-- EUR Wallet -->
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                <span class="flex items-center gap-1"><span>🇩🇪</span> EUR</span>
+                                <span class="text-slate-400">&vellip;</span>
+                            </div>
+                            <div class="text-xs font-black text-slate-900 dark:text-white mt-1">€18,345.00</div>
+                            <div class="text-[9px] text-slate-400 leading-none">Limit is €8k a month</div>
+                            <div class="text-[9px] text-emerald-500 font-bold pt-0.5">Active</div>
+                        </div>
+
+                        <!-- GBP Wallet -->
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                                <span class="flex items-center gap-1"><span>🇬🇧</span> GBP</span>
+                                <span class="text-slate-400">&vellip;</span>
+                            </div>
+                            <div class="text-xs font-black text-slate-900 dark:text-white mt-1">£15,000.00</div>
+                            <div class="text-[9px] text-slate-400 leading-none">Limit is £7.5k a month</div>
+                            <div class="text-[9px] text-slate-400 font-bold pt-0.5">Inactive</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Card 2: Monthly Spending Limit Progress Bar -->
+            <div class="rounded-[28px] bg-white dark:bg-[#111827] p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] space-y-3.5">
+                <div class="text-xs font-extrabold text-slate-900 dark:text-white">
+                    Monthly Spending Limit
+                </div>
+
+                <!-- Orange Progress Bar -->
+                <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden flex">
+                    <div class="bg-[#FF5B26] h-full rounded-full transition-all duration-500" style="width: 28%;"></div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs">
+                    <span class="font-extrabold text-slate-800 dark:text-slate-200">$1,400.00 <span class="font-normal text-slate-400 text-[11px]">spent out of</span></span>
+                    <span class="font-extrabold text-slate-800 dark:text-slate-200">$5,500.00</span>
+                </div>
+            </div>
+
+            <!-- Card 3: My Cards (Black & Orange Cards side by side) -->
+            <div class="rounded-[28px] bg-white dark:bg-[#111827] p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-xs font-extrabold text-slate-900 dark:text-white">
+                        <!-- Card vector SVG -->
+                        <svg class="w-4 h-4 text-slate-700 dark:text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="20" height="14" x="2" y="5" rx="3"></rect>
+                            <line x1="2" x2="22" y1="10" y2="10"></line>
+                        </svg>
+                        <span>My Cards</span>
+                    </div>
+                    <button type="button" class="text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+                        + Add new
+                    </button>
+                </div>
+
+                <!-- 2 Stylized Physical Cards -->
+                <div class="grid grid-cols-2 gap-3">
+                    
+                    <!-- Card A: Sleek Matte Black Card -->
+                    <div class="rounded-2xl bg-[#18181B] text-white p-3.5 shadow-md flex flex-col justify-between h-32 relative overflow-hidden border border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <!-- Contactless Wave Icon -->
+                            <svg class="w-3.5 h-3.5 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M5 8.5a7 7 0 0 1 0 7"></path>
+                                <path d="M8.5 6a10.5 10.5 0 0 1 0 12"></path>
+                                <path d="M12 3.5a14 14 0 0 1 0 17"></path>
+                            </svg>
+                            <span class="px-2 py-0.5 rounded-full bg-white/20 text-[9px] font-bold text-white">Active</span>
+                        </div>
+
+                        <!-- MC / Visa overlapping circles -->
+                        <div class="flex items-center gap-1 opacity-80 self-end -mt-2">
+                            <div class="w-3.5 h-3.5 rounded-full bg-amber-500"></div>
+                            <div class="w-3.5 h-3.5 rounded-full bg-red-500 -ml-2"></div>
+                        </div>
+
+                        <!-- Card Numbers -->
+                        <div class="pt-2">
+                            <div class="text-[9px] text-white/50 leading-tight">Card Number</div>
+                            <div class="text-[11px] font-mono tracking-wider font-bold">•••• •••• 6782</div>
+                            <div class="flex items-center justify-between text-[8px] text-white/60 mt-1">
+                                <span>EXP 09/29</span>
+                                <span>CVV 611</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card B: Vibrant Warm Coral/Orange Card (#FF5B26) -->
+                    <div class="rounded-2xl bg-[#FF5B26] text-white p-3.5 shadow-md flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="flex items-center justify-between">
+                            <!-- Contactless Wave Icon -->
+                            <svg class="w-3.5 h-3.5 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M5 8.5a7 7 0 0 1 0 7"></path>
+                                <path d="M8.5 6a10.5 10.5 0 0 1 0 12"></path>
+                                <path d="M12 3.5a14 14 0 0 1 0 17"></path>
+                            </svg>
+                            <span class="px-2 py-0.5 rounded-full bg-white/25 text-[9px] font-bold text-white">Active</span>
+                        </div>
+
+                        <!-- Sparkles decoration -->
+                        <div class="self-center opacity-40">
+                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/>
+                            </svg>
+                        </div>
+
+                        <div class="pt-2">
+                            <div class="text-[9px] text-white/70 leading-tight">Card Number</div>
+                            <div class="text-[11px] font-mono tracking-wider font-bold">•••• •••• 4356</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ========================================== -->
+        <!-- RIGHT COLUMN: 4 Stats, Chart & Table -->
+        <!-- ========================================== -->
+        <div class="lg:col-span-8 space-y-5">
+            
+            <!-- Top Section: 4 Stat Cards (Left) + Total Income Chart (Right) -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+                
+                <!-- 4 Stat Cards in 2x2 Grid (md:col-span-6) -->
+                <div class="md:col-span-6 grid grid-cols-2 gap-4">
+                    
+                    <!-- Stat 1: Total Earnings (Orange Vibrant Card) -->
+                    <div class="rounded-[26px] p-5 bg-[#FF5B26] text-white flex flex-col justify-between shadow-lg shadow-[#FF5B26]/20 relative overflow-hidden">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-white/85">Total Earnings</span>
+                            <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                                <!-- Wallet icon SVG -->
+                                <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"></path>
+                                    <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="my-3">
+                            <div class="text-2xl sm:text-3xl font-black heading-font text-white tracking-tight">
+                                ${{ won_revenue|default:"950" }}
+                            </div>
+                        </div>
+
+                        <div class="inline-flex items-center gap-1 text-[11px] font-bold text-white/90">
+                            <span>↑ 7%</span>
+                            <span class="font-normal text-white/70">This month</span>
+                        </div>
+                    </div>
+
+                    <!-- Stat 2: Total Spending (White Card) -->
+                    <div class="rounded-[26px] p-5 bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Spending</span>
+                            <div class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                <!-- Bag / Lock icon -->
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="my-3">
+                            <div class="text-2xl sm:text-3xl font-black heading-font text-slate-900 dark:text-white tracking-tight">
+                                $700
+                            </div>
+                        </div>
+
+                        <div class="inline-flex items-center gap-1 text-[11px] font-bold text-rose-500">
+                            <span>↓ 5%</span>
+                            <span class="text-slate-400 font-normal">This month</span>
+                        </div>
+                    </div>
+
+                    <!-- Stat 3: Total Income (White Card) -->
+                    <div class="rounded-[26px] p-5 bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Income</span>
+                            <div class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                <!-- Coin stack / database icon -->
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="my-3">
+                            <div class="text-2xl sm:text-3xl font-black heading-font text-slate-900 dark:text-white tracking-tight">
+                                $1,050
+                            </div>
+                        </div>
+
+                        <div class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-500">
+                            <span>↑ 8%</span>
+                            <span class="text-slate-400 font-normal">This month</span>
+                        </div>
+                    </div>
+
+                    <!-- Stat 4: Total Revenue (White Card) -->
+                    <div class="rounded-[26px] p-5 bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Revenue</span>
+                            <div class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                <!-- Hourglass / target icon -->
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M5 22h14"></path>
+                                    <path d="M5 2h14"></path>
+                                    <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path>
+                                    <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="my-3">
+                            <div class="text-2xl sm:text-3xl font-black heading-font text-slate-900 dark:text-white tracking-tight">
+                                $850
+                            </div>
+                        </div>
+
+                        <div class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-500">
+                            <span>↑ 4%</span>
+                            <span class="text-slate-400 font-normal">This month</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Total Income Bar Chart (md:col-span-6) -->
+                <div class="md:col-span-6 rounded-[28px] bg-white dark:bg-[#111827] p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] flex flex-col justify-between">
+                    
+                    <!-- Header & Subtitle -->
+                    <div class="space-y-0.5">
+                        <div class="text-sm font-extrabold text-slate-900 dark:text-white">
+                            Total Income
+                        </div>
+                        <div class="text-[11px] text-slate-400">
+                            View your income in a certain period of time
+                        </div>
+                    </div>
+
+                    <!-- Legend: Profit & Loss -->
+                    <div class="flex items-center justify-between text-[11px] py-2">
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Profit and Loss</span>
+                        <div class="flex items-center gap-3">
+                            <span class="inline-flex items-center gap-1.5 font-bold text-slate-600 dark:text-slate-300">
+                                <span class="w-2 h-2 rounded-full bg-blue-600"></span> Profit
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 font-bold text-slate-600 dark:text-slate-300">
+                                <span class="w-2 h-2 rounded-full bg-slate-900 dark:bg-white"></span> Loss
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 8 Monthly Dual Bars (Matching exact screenshot styling) -->
+                    <div class="pt-3">
+                        <div class="flex items-end justify-between h-40 gap-2 px-1 relative">
+                            
+                            <!-- Background Y-Axis Grid Lines & Labels -->
+                            <div class="absolute inset-x-0 inset-y-0 flex flex-col justify-between pointer-events-none text-[9px] text-slate-300 dark:text-slate-700 font-mono">
+                                <div class="border-b border-dashed border-slate-100 dark:border-slate-800 pb-0.5">50k</div>
+                                <div class="border-b border-dashed border-slate-100 dark:border-slate-800 pb-0.5">40k</div>
+                                <div class="border-b border-dashed border-slate-100 dark:border-slate-800 pb-0.5">30k</div>
+                                <div class="border-b border-dashed border-slate-100 dark:border-slate-800 pb-0.5">20k</div>
+                                <div class="border-b border-dashed border-slate-100 dark:border-slate-800 pb-0.5">10k</div>
+                                <div class="border-b border-slate-100 dark:border-slate-800 pb-0.5">00</div>
+                            </div>
+
+                            <!-- Bar 1: Jan -->
+                            <div class="flex-1 flex flex-col items-center justify-end h-full z-10 group">
+                                <div class="w-full max-w-[20px] flex flex-col gap-1 items-center">
+                                    <div class="w-full bg-[#FF5B26] chart-striped-bar rounded-lg transition-all group-hover:scale-105" style="height: 52px;"></div>
+                                    <div class="w-full bg-[#18181B] dark:bg-slate-700 rounded-lg transition-all group-hover:scale-105" style="height: 28px;"></div>
+                                </div>
+                                <span class="text-[9px] text-slate-400 mt-2">Jan</span>
+                            </div>
+
+                            <!-- Bar 2: Feb -->
+                            <div class="flex-1 flex flex-col items-center justify-end h-full z-10 group">
+                                <div class="w-full max-w-[20px] flex flex-col gap-1 items-center">
+                                    <div class="w-full bg-[#FF5B26] chart-striped-bar rounded-lg transition-all group-hover:scale-105" style="height: 68px;"></div>
+                                    <div class="w-full bg-[#18181B] dark:bg-slate-700 rounded-lg transition-all group-hover:scale-105" style="height: 36px;"></div>
+                                </div>
+                                <span class="text-[9px] text-slate-400 mt-2">Feb</span>
+                            </div>
+
+                            <!-- Bar 3: Mar -->
+                            <div class="flex-1 flex flex-col items-center justify-end h-full z-10 group">
+                                <div class="w-full max-w-[20px] flex flex-col gap-1 items-center">
+                                    <div class="w-full bg-[#FF5B26] chart-striped-bar rounded-lg transition-all group-hover:scale-105" style="height: 44px;"></div>
+                                    <div class="w-full bg-[#18181B] dark:bg-slate-700 rounded-lg transition-all group-hover:scale-105" style="height: 48px;"></div>
+                                </div>
+                                <span class="text-[9px] text-slate-400 mt-2">Mar</span>
+                            </div>
+
+                            <!-- Bar 4: Apr -->
+                            <div class="flex-1 flex flex-col items-center justify-end h-full z-10 group">
+                                <div class="w-full max-w-[20px] flex flex-col gap-1 items-center">
+                                    <div class="w-full bg-[#FF5B26] chart-striped-bar rounded-lg transition-all group-hover:scale-105" style="height: 72px;"></div>
+                                    <div class="w-full bg-[#18181B] dark:bg-slate-700 rounded-lg transition-all group-hover:scale-105" style="height: 38px;"></div>
+                                </div>
+                                <span class="text-[9px] text-slate-400 mt-2">Apr</span>
+                            </div>
+
+                            <!-- Bar 5: May -->
+                            <div class="flex-1 flex flex-col items-center justify-end h-full z-10 group">
+                                <div class="w-full max-w-[20px] flex flex-col gap-1 items-center">
+                                    <div class="w-full bg-[#FF5B26] chart-striped-bar rounded-lg transition-all group-hover:scale-105" style="height: 84px;"></div>
+                                    <div class="w-full bg-[#18181B] dark:bg-slate-700 rounded-lg transition-all group-hover:scale-105" style="height: 32px;"></div>
+                                </div>
+                                <span class="text-[9px] text-slate-400 mt-2">May</span>
+                            </div>
+
+                            <!-- Bar 6: Jun -->
+                            <div class="flex-1 flex flex-col items-center justify-end h-full z-10 group">
+                                <div class="w-full max-w-[20px] flex flex-col gap-1 items-center">
+                                    <div class="w-full bg-[#FF5B26] chart-striped-bar rounded-lg transition-all group-hover:scale-105" style="height: 46px;"></div>
+                                    <div class="w-full bg-[#18181B] dark:bg-slate-700 rounded-lg transition-all group-hover:scale-105" style="height: 78px;"></div>
+                                </div>
+                                <span class="text-[9px] text-slate-400 mt-2">Jun</span>
+                            </div>
+
+                            <!-- Bar 7: Jul -->
+                            <div class="flex-1 flex flex-col items-center justify-end h-full z-10 group">
+                                <div class="w-full max-w-[20px] flex flex-col gap-1 items-center">
+                                    <div class="w-full bg-[#FF5B26] chart-striped-bar rounded-lg transition-all group-hover:scale-105" style="height: 64px;"></div>
+                                    <div class="w-full bg-[#18181B] dark:bg-slate-700 rounded-lg transition-all group-hover:scale-105" style="height: 60px;"></div>
+                                </div>
+                                <span class="text-[9px] text-slate-400 mt-2">Jul</span>
+                            </div>
+
+                            <!-- Bar 8: Aug -->
+                            <div class="flex-1 flex flex-col items-center justify-end h-full z-10 group">
+                                <div class="w-full max-w-[20px] flex flex-col gap-1 items-center">
+                                    <div class="w-full bg-[#FF5B26] chart-striped-bar rounded-lg transition-all group-hover:scale-105" style="height: 58px;"></div>
+                                    <div class="w-full bg-[#18181B] dark:bg-slate-700 rounded-lg transition-all group-hover:scale-105" style="height: 50px;"></div>
+                                </div>
+                                <span class="text-[9px] text-slate-400 mt-2">Aug</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Bottom Section: Recent Activities Table (Matching exact screenshot) -->
+            <div class="rounded-[28px] bg-white dark:bg-[#111827] p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] space-y-4">
+                
+                <!-- Table Header: Title + Search & Filter Tools -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white">
+                        Recent Activities
+                    </h3>
+
+                    <div class="flex items-center gap-2">
+                        <!-- Search Box -->
+                        <div class="relative">
+                            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+                            <input type="text" 
+                                   x-model="searchQuery" 
+                                   placeholder="Search" 
+                                   class="pl-8 pr-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FF5B26] w-40 sm:w-48">
+                        </div>
+
+                        <!-- Filter Button -->
+                        <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 shadow-sm">
+                            <span>Filter</span>
+                            <!-- Filter funnel vector SVG -->
+                            <svg class="w-3 h-3 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Clean Table Structure -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="text-slate-400 dark:text-slate-500 font-semibold border-b border-slate-100 dark:border-slate-800 pb-2">
+                                <th class="py-3 px-3 w-8">
+                                    <input type="checkbox" class="w-4 h-4 rounded text-slate-900 dark:text-white border-slate-300 dark:border-slate-700 focus:ring-0">
+                                </th>
+                                <th class="py-3 px-4 font-semibold">Order ID</th>
+                                <th class="py-3 px-4 font-semibold">Activity</th>
+                                <th class="py-3 px-4 font-semibold">Price</th>
+                                <th class="py-3 px-4 font-semibold">Status</th>
+                                <th class="py-3 px-4 font-semibold">Date</th>
+                                <th class="py-3 px-3 text-right"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
+                            
+                            <!-- Row 1: Mobile App Purchase -->
+                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                                <td class="py-3 px-3">
+                                    <input type="checkbox" @click="toggleRow('INV_000076')" :checked="selectedRows.includes('INV_000076')" class="w-4 h-4 rounded text-slate-900 border-slate-300 dark:border-slate-700">
+                                </td>
+                                <td class="py-3 px-4 text-slate-500 font-mono">INV_000076</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-lg bg-sky-500/15 text-sky-500 flex items-center justify-center font-bold text-xs">
+                                            A
+                                        </div>
+                                        <span class="font-bold text-slate-900 dark:text-white">Mobile App Purchase</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 font-extrabold text-slate-900 dark:text-white">$25,500</td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Completed
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-slate-500">17 Apr, 2026 03:45 PM</td>
+                                <td class="py-3 px-3 text-right text-slate-400 hover:text-slate-900 cursor-pointer">&bull;&bull;&bull;</td>
+                            </tr>
+
+                            <!-- Row 2: Hotel Booking -->
+                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                                <td class="py-3 px-3">
+                                    <input type="checkbox" @click="toggleRow('INV_000075')" :checked="selectedRows.includes('INV_000075')" class="w-4 h-4 rounded text-slate-900 border-slate-300 dark:border-slate-700">
+                                </td>
+                                <td class="py-3 px-4 text-slate-500 font-mono">INV_000075</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-lg bg-indigo-500/15 text-indigo-500 flex items-center justify-center">
+                                            <i data-lucide="hotel" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                        <span class="font-bold text-slate-900 dark:text-white">Hotel Booking</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 font-extrabold text-slate-900 dark:text-white">$32,750</td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center gap-1.5 font-bold text-rose-500">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                        Pending
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-slate-500">15 Apr, 2026 11:30 AM</td>
+                                <td class="py-3 px-3 text-right text-slate-400 hover:text-slate-900 cursor-pointer">&bull;&bull;&bull;</td>
+                            </tr>
+
+                            <!-- Row 3: Flight Ticket Booking -->
+                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                                <td class="py-3 px-3">
+                                    <input type="checkbox" @click="toggleRow('INV_000074')" :checked="selectedRows.includes('INV_000074')" class="w-4 h-4 rounded text-slate-900 border-slate-300 dark:border-slate-700">
+                                </td>
+                                <td class="py-3 px-4 text-slate-500 font-mono">INV_000074</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-lg bg-cyan-500/15 text-cyan-500 flex items-center justify-center">
+                                            <i data-lucide="plane" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                        <span class="font-bold text-slate-900 dark:text-white">Flight Ticket Booking</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 font-extrabold text-slate-900 dark:text-white">$40,200</td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Completed
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-slate-500">15 Apr, 2026 12:00 PM</td>
+                                <td class="py-3 px-3 text-right text-slate-400 hover:text-slate-900 cursor-pointer">&bull;&bull;&bull;</td>
+                            </tr>
+
+                            <!-- Row 4: Grocery Purchase (Selected in screenshot) -->
+                            <tr class="bg-slate-50/80 dark:bg-slate-800/60 transition">
+                                <td class="py-3 px-3">
+                                    <input type="checkbox" checked @click="toggleRow('INV_000073')" class="w-4 h-4 rounded text-slate-900 bg-slate-900 dark:bg-white border-slate-300 dark:border-slate-700">
+                                </td>
+                                <td class="py-3 px-4 text-slate-700 dark:text-slate-300 font-mono font-bold">INV_000073</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center">
+                                            <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                        <span class="font-bold text-slate-900 dark:text-white">Grocery Purchase</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 font-extrabold text-slate-900 dark:text-white">$50,200</td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-400">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        In Progress
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-slate-500">14 Apr, 2026 09:15 PM</td>
+                                <td class="py-3 px-3 text-right text-slate-400 hover:text-slate-900 cursor-pointer">&bull;&bull;&bull;</td>
+                            </tr>
+
+                            <!-- Row 5: Software License -->
+                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                                <td class="py-3 px-3">
+                                    <input type="checkbox" @click="toggleRow('INV_000072')" :checked="selectedRows.includes('INV_000072')" class="w-4 h-4 rounded text-slate-900 border-slate-300 dark:border-slate-700">
+                                </td>
+                                <td class="py-3 px-4 text-slate-500 font-mono">INV_000072</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-lg bg-rose-500/15 text-rose-500 flex items-center justify-center font-bold text-xs">
+                                            A
+                                        </div>
+                                        <span class="font-bold text-slate-900 dark:text-white">Software License</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 font-extrabold text-slate-900 dark:text-white">$15,900</td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Completed
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-slate-500">10 Apr, 2026 06:00 AM</td>
+                                <td class="py-3 px-3 text-right text-slate-400 hover:text-slate-900 cursor-pointer">&bull;&bull;&bull;</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

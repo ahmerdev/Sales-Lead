@@ -1,0 +1,88 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ title }} — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="w-full space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ title }}</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">Configure email template subject, message body, and dynamic client placeholder variables.</p>
+        </div>
+        <a href="{% url 'outreach:templates_list' %}" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m15 18-6-6 6-6"/>
+            </svg>
+            <span>Back to Templates</span>
+        </a>
+    </div>
+
+    <!-- Dynamic Tags Helper -->
+    <div class="p-5 rounded-3xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/90 dark:border-indigo-800/60 text-xs space-y-2.5 shadow-sm">
+        <div class="font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center gap-2 text-xs">
+            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path>
+                <path d="M7 7h.01"></path>
+            </svg>
+            <span>Clickable Merge Tags (Tap to append into body):</span>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-1" x-data>
+            <button type="button" @click="$refs.bodyArea.value += ' {{business_name}}'" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-900 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold border border-indigo-200 dark:border-indigo-800/80 transition shadow-sm">&#123;&#123;business_name&#125;&#125;</button>
+            <button type="button" @click="$refs.bodyArea.value += ' {{website}}'" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-900 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold border border-indigo-200 dark:border-indigo-800/80 transition shadow-sm">&#123;&#123;website&#125;&#125;</button>
+            <button type="button" @click="$refs.bodyArea.value += ' {{city}}'" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-900 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold border border-indigo-200 dark:border-indigo-800/80 transition shadow-sm">&#123;&#123;city&#125;&#125;</button>
+            <button type="button" @click="$refs.bodyArea.value += ' {{industry}}'" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-900 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold border border-indigo-200 dark:border-indigo-800/80 transition shadow-sm">&#123;&#123;industry&#125;&#125;</button>
+            <button type="button" @click="$refs.bodyArea.value += ' {{sender_name}}'" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-900 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold border border-indigo-200 dark:border-indigo-800/80 transition shadow-sm">&#123;&#123;sender_name&#125;&#125;</button>
+            <button type="button" @click="$refs.bodyArea.value += ' {{proposal_link}}'" class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-900 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold border border-indigo-200 dark:border-indigo-800/80 transition shadow-sm">&#123;&#123;proposal_link&#125;&#125;</button>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl">
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Template Name *</label>
+                    <input type="text" name="name" value="{{ template.name|default:'' }}" required placeholder="e.g. High Opportunity Restaurant Pitch" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Category</label>
+                    <select name="category" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-sm">
+                        <option value="Cold Outreach" {% if template.category == 'Cold Outreach' %}selected{% endif %}>Cold Outreach</option>
+                        <option value="Follow-up" {% if template.category == 'Follow-up' %}selected{% endif %}>Follow-up</option>
+                        <option value="Proposal Dispatch" {% if template.category == 'Proposal Dispatch' %}selected{% endif %}>Proposal Dispatch</option>
+                        <option value="Closing" {% if template.category == 'Closing' %}selected{% endif %}>Closing / Won</option>
+                        <option value="Custom" {% if template.category == 'Custom' %}selected{% endif %}>Custom</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Subject Line *</label>
+                <input type="text" name="subject" value="{{ template.subject|default:'' }}" required placeholder="e.g. Quick idea regarding &#123;&#123;business_name&#125;&#125; website" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-2xl px-4 py-3 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-sm">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Email Message Body *</label>
+                <textarea x-ref="bodyArea" name="body" rows="10" required placeholder="Write your personalized pitch template..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-2xl p-4 text-xs text-slate-900 dark:text-white font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-sm">{{ template.body|default:'' }}</textarea>
+            </div>
+
+            <div class="pt-1">
+                <label class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                    <input type="checkbox" name="is_default" {% if template.is_default %}checked{% endif %} class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
+                    <span class="font-medium">Set as primary default outreach template</span>
+                </label>
+            </div>
+
+            <div class="pt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
+                <a href="{% url 'outreach:templates_list' %}" class="px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition">
+                    Save Template
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

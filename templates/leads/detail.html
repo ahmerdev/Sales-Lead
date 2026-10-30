@@ -1,0 +1,633 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ lead.business_name }} — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="space-y-6 w-full" x-data="{ activeTab: 'audit' }">
+    <!-- Top Action Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm dark:shadow-xl backdrop-blur-2xl">
+        <div class="flex items-start gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center font-extrabold text-xl text-white shadow-lg shadow-indigo-600/30 shrink-0">
+                {{ lead.business_name|slice:":1"|upper }}
+            </div>
+            <div>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ lead.business_name }}</h1>
+                    <span class="px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        {{ lead.get_industry_display }}
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-extrabold
+                        {% if lead.opportunity_level == 'HIGH' %}bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30
+                        {% elif lead.opportunity_level == 'MEDIUM' %}bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30
+                        {% else %}bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700{% endif %}">
+                        Score: {{ lead.opportunity_score }}/100 ({{ lead.opportunity_level }} OPPORTUNITY)
+                    </span>
+                </div>
+                <div class="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400 mt-2 flex-wrap">
+                    {% if lead.website %}
+                    <a href="{{ lead.website }}" target="_blank" class="hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold flex items-center gap-1 transition">
+                        <i data-lucide="globe" class="w-3.5 h-3.5 text-slate-400"></i>
+                        {{ lead.website }}
+                    </a>
+                    {% endif %}
+                    {% if lead.email %}
+                    <span class="flex items-center gap-1">
+                        <i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i>
+                        {{ lead.email }}
+                    </span>
+                    {% endif %}
+                    {% if lead.phone %}
+                    <span class="flex items-center gap-1">
+                        <i data-lucide="phone" class="w-3.5 h-3.5 text-slate-400"></i>
+                        {{ lead.phone }}
+                    </span>
+                    {% endif %}
+                    <span class="flex items-center gap-1">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                        {{ lead.city }}{% if lead.country %}, {{ lead.country }}{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action CTAs -->
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <a href="{% url 'scanner:scan_lead' lead_id=lead.id %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition border border-slate-200 dark:border-slate-700/60 shadow-sm">
+                <i data-lucide="scan" class="w-4 h-4 text-indigo-500"></i>
+                {% if audit %}Re-Scan Website{% else %}Scan Website{% endif %}
+            </a>
+
+            <a href="{% url 'ai_engine:generate_pitch' lead_id=lead.id %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition transform hover:-translate-y-0.5">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
+                Generate AI Outreach
+            </a>
+
+            <a href="{% url 'proposals:create' lead_id=lead.id %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition">
+                <i data-lucide="file-check-2" class="w-4 h-4"></i>
+                Create Proposal
+            </a>
+
+            <!-- Quick Stage Switcher -->
+            <form action="{% url 'crm:update_stage' lead_id=lead.id %}" method="POST" class="inline-block">
+                {% csrf_token %}
+                <select name="status" onchange="this.form.submit()" class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+                    <option value="NEW" {% if lead.status == 'NEW' %}selected{% endif %}>Stage: New</option>
+                    <option value="CONTACTED" {% if lead.status == 'CONTACTED' %}selected{% endif %}>Stage: Contacted</option>
+                    <option value="REPLIED" {% if lead.status == 'REPLIED' %}selected{% endif %}>Stage: Replied</option>
+                    <option value="INTERESTED" {% if lead.status == 'INTERESTED' %}selected{% endif %}>Stage: Interested</option>
+                    <option value="PROPOSAL" {% if lead.status == 'PROPOSAL' %}selected{% endif %}>Stage: Proposal Sent</option>
+                    <option value="WON" {% if lead.status == 'WON' %}selected{% endif %}>Stage: Won / Closed</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-sm font-bold overflow-x-auto">
+        <button @click="activeTab = 'audit'" :class="activeTab === 'audit' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 pb-2 -mb-2.5 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'" class="px-4 py-2 flex items-center gap-2 transition shrink-0">
+            <i data-lucide="activity" class="w-4 h-4"></i>
+            Website Health &amp; Opportunities
+        </button>
+        <button @click="activeTab = 'ai'" :class="activeTab === 'ai' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 pb-2 -mb-2.5 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'" class="px-4 py-2 flex items-center gap-2 transition shrink-0">
+            <i data-lucide="mail" class="w-4 h-4"></i>
+            AI Outreach Pitch ({{ ai_pitches.count }})
+        </button>
+        <button @click="activeTab = 'crm'" :class="activeTab === 'crm' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 pb-2 -mb-2.5 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'" class="px-4 py-2 flex items-center gap-2 transition shrink-0">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            CRM &amp; Follow-ups ({{ followups.count }})
+        </button>
+        <button @click="activeTab = 'messages'" :class="activeTab === 'messages' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 pb-2 -mb-2.5 font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'" class="px-4 py-2 flex items-center gap-2 transition shrink-0">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+            WhatsApp &amp; Email Inbox ({{ lead_messages.count }})
+        </button>
+    </div>
+
+    <!-- TAB 1: WEBSITE HEALTH AUDIT & OPPORTUNITY ENGINE -->
+    <div x-show="activeTab === 'audit'" class="space-y-6">
+        {% if audit %}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Website Health Checklist -->
+            <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl backdrop-blur-2xl">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i data-lucide="scan" class="w-4 h-4 text-indigo-500"></i>
+                        Website Health Checklist
+                    </h3>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">
+                        Audited {{ audit.scanned_at|timesince }} ago
+                    </span>
+                </div>
+
+                <div class="divide-y divide-slate-100 dark:divide-slate-800/60 text-sm">
+                    <div class="py-3 flex items-center justify-between">
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">SSL Certificate</span>
+                        {% if audit.is_ssl %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">✓ Secure (HTTPS)</span>
+                        {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1">✕ Missing SSL</span>
+                        {% endif %}
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">Mobile Responsive</span>
+                        {% if audit.is_mobile_responsive %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">✓ Viewport OK</span>
+                        {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-bold">✕ Not Optimized</span>
+                        {% endif %}
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">Page Status</span>
+                        {% if audit.page_status_ok %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">✓ 200 OK</span>
+                        {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-bold">✕ {{ audit.status_code }} Error</span>
+                        {% endif %}
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">Broken Links</span>
+                        {% if audit.broken_links_count > 0 %}
+                            <span class="text-amber-600 dark:text-amber-400 font-bold">⚠ {{ audit.broken_links_count }} Detected</span>
+                        {% else %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">✓ Clean</span>
+                        {% endif %}
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">Meta Description</span>
+                        {% if audit.has_meta_description %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">✓ Found</span>
+                        {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-bold">✕ Missing</span>
+                        {% endif %}
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">Primary H1 Heading</span>
+                        {% if audit.has_h1 %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">✓ Configured</span>
+                        {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-bold">✕ Missing H1</span>
+                        {% endif %}
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">Image ALT Tags</span>
+                        {% if audit.images_missing_alt > 0 %}
+                            <span class="text-amber-600 dark:text-amber-400 font-bold">⚠ {{ audit.images_missing_alt }} Missing Alt</span>
+                        {% else %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">✓ All Optimized</span>
+                        {% endif %}
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">WhatsApp Fast CTA</span>
+                        {% if audit.has_whatsapp_cta %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">✓ Present</span>
+                        {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-bold">✕ Missing CTA</span>
+                        {% endif %}
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">Online Booking / Appointment</span>
+                        {% if audit.has_online_booking %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">✓ Integrated</span>
+                        {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-bold">✕ Missing System</span>
+                        {% endif %}
+                    </div>
+                    <div class="py-3 flex items-center justify-between">
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">Online Ordering / Catalog</span>
+                        {% if audit.has_online_ordering %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">✓ Integrated</span>
+                        {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-bold">✕ No Direct Ordering</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opportunity Engine Results -->
+            <div class="space-y-6">
+                <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl backdrop-blur-2xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+                            Opportunity Engine Analysis
+                        </h3>
+                        <span class="text-xs font-extrabold px-3 py-1 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                            {{ lead.opportunity_score }} PTS
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mb-5">
+                        The backend opportunity engine calculated revenue potential and identified actionable services to pitch this client:
+                    </p>
+
+                    <div class="space-y-3">
+                        {% for opp in opportunities %}
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+                                    {{ opp.recommended_service }}
+                                </span>
+                                <span class="text-[11px] font-black text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-lg bg-amber-500/15">
+                                    +{{ opp.score_impact }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-2">{{ opp.description }}</p>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-6 text-xs text-slate-400">
+                            No opportunities identified yet. Click "Scan Website" above.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-16 bg-white/95 dark:bg-slate-900/60 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-8">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3 text-indigo-500">
+                <i data-lucide="scan" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">No website audit performed yet</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1">
+                Run the Website Scanner to evaluate SSL, WhatsApp CTA, online ordering, appointment booking, and SEO indicators.
+            </p>
+            <div class="mt-5">
+                <a href="{% url 'scanner:scan_lead' lead_id=lead.id %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition">
+                    <i data-lucide="scan" class="w-4 h-4"></i>
+                    Audit Website Now
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- TAB 2: AI OUTREACH ENGINE & PITCHES -->
+    <div x-show="activeTab === 'ai'" class="space-y-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">AI-Generated Cold Outreach Pitches</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Tailored email pitches grounded in this lead's detected business gaps</p>
+            </div>
+            <a href="{% url 'ai_engine:generate_pitch' lead_id=lead.id %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Generate New AI Draft
+            </a>
+        </div>
+
+        <div class="space-y-4">
+            {% for pitch in ai_pitches %}
+            <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl backdrop-blur-2xl space-y-4" x-data="{ copied: false }">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div>
+                        <div class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">SUBJECT LINE:</div>
+                        <div class="text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">{{ pitch.subject }}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold
+                            {% if pitch.status == 'APPROVED' %}bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30
+                            {% elif pitch.status == 'SENT' %}bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30
+                            {% else %}bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700{% endif %}">
+                            {{ pitch.get_status_display }}
+                        </span>
+                        {% if pitch.status == 'DRAFT' %}
+                        <a href="{% url 'ai_engine:approve_pitch' pitch_id=pitch.id %}" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
+                            Approve Pitch
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Email Body -->
+                <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 font-mono text-xs text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed border border-slate-200 dark:border-slate-800/80">
+{{ pitch.email_body }}
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
+                    <span>Generated {{ pitch.created_at|date:"M d, Y • H:i" }}</span>
+                    <button @click="navigator.clipboard.writeText(`Subject: {{ pitch.subject }}\n\n{{ pitch.email_body }}`); copied = true; setTimeout(() => copied = false, 2500)"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold transition">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                        <span x-text="copied ? 'Copied to Clipboard!' : 'Copy Cold Pitch'"></span>
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-12 bg-white/95 dark:bg-slate-900/60 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-6">
+                <i data-lucide="mail" class="w-10 h-10 text-slate-400 mx-auto mb-2"></i>
+                <h4 class="text-sm font-bold text-slate-900 dark:text-white">No outreach pitch created yet</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Click "Generate AI Outreach" to automatically craft a consultative email draft.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- TAB 3: CRM, NOTES & FOLLOW-UPS -->
+    <div x-show="activeTab === 'crm'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Scheduled Follow-ups -->
+        <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl backdrop-blur-2xl space-y-4">
+            <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i>
+                Scheduled Follow-ups
+            </h3>
+
+            <!-- Schedule new follow-up form -->
+            <form action="{% url 'crm:add_followup' lead_id=lead.id %}" method="POST" class="flex gap-2">
+                {% csrf_token %}
+                <input type="date" name="scheduled_date" required class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" name="notes" placeholder="Follow-up notes (e.g. Call manager)" class="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shrink-0 shadow-md shadow-indigo-600/25">
+                    Schedule
+                </button>
+            </form>
+
+            <div class="divide-y divide-slate-100 dark:divide-slate-800/60 pt-2 text-xs">
+                {% for f in followups %}
+                <div class="py-3 flex items-center justify-between">
+                    <div>
+                        <div class="font-bold {% if f.is_completed %}text-slate-400 line-through{% else %}text-slate-900 dark:text-white{% endif %}">
+                            {{ f.scheduled_date|date:"F d, Y" }}
+                        </div>
+                        <div class="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">{{ f.notes|default:"Next follow-up discussion" }}</div>
+                    </div>
+                    {% if not f.is_completed %}
+                    <a href="{% url 'crm:complete_followup' followup_id=f.id %}" class="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-700 dark:text-slate-300 text-xs font-bold transition">
+                        Mark Done
+                    </a>
+                    {% else %}
+                    <span class="text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">✓ Completed</span>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p class="text-xs text-slate-400 py-4 text-center">No follow-ups scheduled.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- CRM Activity Timeline & Notes -->
+        <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl backdrop-blur-2xl space-y-4">
+            <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="history" class="w-4 h-4 text-indigo-500"></i>
+                Activity Timeline &amp; Notes
+            </h3>
+
+            <!-- Add Note -->
+            <form action="{% url 'crm:add_note' lead_id=lead.id %}" method="POST" class="space-y-3">
+                {% csrf_token %}
+                <textarea name="note" rows="2" placeholder="Record a note, call outcome, or client feedback..." required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                <div class="text-right">
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25">
+                        Add Note
+                    </button>
+                </div>
+            </form>
+
+            <div class="space-y-3 pt-2">
+                {% for act in activities %}
+                <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-xs space-y-1">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                        <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ act.get_activity_type_display }}</span>
+                        <span class="text-[11px]">{{ act.created_at|timesince }} ago</span>
+                    </div>
+                    <p class="text-slate-800 dark:text-slate-200">{{ act.description }}</p>
+                </div>
+                {% empty %}
+                <p class="text-xs text-slate-400 py-4 text-center">No activity history recorded yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: WHATSAPP & EMAIL DIRECT MESSAGING & CLIENT INBOX -->
+    <div x-show="activeTab === 'messages'" class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left: 1-Click WhatsApp & Email Senders -->
+            <div class="space-y-6">
+                <!-- 1-Click WhatsApp Sender -->
+                <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl backdrop-blur-2xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="message-circle" class="w-4 h-4 text-emerald-500"></i>
+                            1-Click Direct WhatsApp Sender
+                        </h3>
+                        <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full">
+                            {{ lead.phone|default:"No phone configured" }}
+                        </span>
+                    </div>
+
+                    <form action="{% url 'outreach:send_whatsapp' lead_id=lead.id %}" method="POST" target="_blank" class="space-y-3">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Recipient WhatsApp Number</label>
+                            <input type="text" name="phone" value="{{ lead.phone }}" required placeholder="+971 50 123 4567" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">WhatsApp Message Body</label>
+                            <textarea name="body" rows="5" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-800 dark:text-slate-200 font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-emerald-500">{% if latest_pitch %}Hi {{ lead.business_name }} Team!
+
+{{ latest_pitch.email_body }}
+{% else %}Hi {{ lead.business_name }} Team! I was reviewing your website and noticed you don't currently have a direct WhatsApp & online ordering system. We help {{ lead.industry }} businesses increase direct orders without changing their website. Would you like a quick 2-minute demo?{% endif %}</textarea>
+                        </div>
+                        {% if portfolio_ready %}
+                        <label class="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                            <input type="checkbox" name="include_portfolio" value="1" checked class="h-4 w-4 rounded border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-emerald-600">
+                            Add my live agency portfolio link
+                        </label>
+                        {% endif %}
+                        <button type="submit" class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-2">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            Launch Direct WhatsApp Chat
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 1-Click Email Sender -->
+                <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl backdrop-blur-2xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="mail" class="w-4 h-4 text-indigo-500"></i>
+                            Direct Email Dispatch
+                        </h3>
+                        <span class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/15 px-2.5 py-0.5 rounded-full">
+                            {{ lead.email|default:"No email set" }}
+                        </span>
+                    </div>
+
+                    <form action="{% url 'outreach:send_email' lead_id=lead.id %}" method="POST" class="space-y-3">
+                        {% csrf_token %}
+                        {% if not email_ready %}
+                        <div class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30 text-xs text-amber-800 dark:text-amber-300">
+                            Your email is not connected yet. <a class="underline font-bold" href="{% url 'accounts:settings' %}?tab=email">Connect your email in Settings</a> to send from your own address.
+                        </div>
+                        {% endif %}
+
+                        <!-- Email Template Selector -->
+                        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-indigo-200 dark:border-indigo-500/30 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+                                    <i data-lucide="layout-template" class="w-3.5 h-3.5"></i>
+                                    Load From Saved Template
+                                </label>
+                                <a href="{% url 'outreach:templates_list' %}" class="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold flex items-center gap-0.5">
+                                    <i data-lucide="plus" class="w-3 h-3"></i> Create Template
+                                </a>
+                            </div>
+                            <select id="emailTemplateSelector" onchange="loadEmailTemplate(this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="">-- Choose a template to auto-fill subject &amp; body --</option>
+                                {% for tmpl in email_templates %}
+                                <option value="{{ tmpl.id }}">{{ tmpl.name }} [{{ tmpl.get_category_display }}]</option>
+                                {% endfor %}
+                            </select>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Selecting a template dynamically injects this lead's business name, city, website, and your proposal link.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Recipient Email</label>
+                            <input type="email" name="recipient_email" value="{{ lead.email }}" required placeholder="owner@business.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Subject</label>
+                            <input type="text" id="emailSubjectInput" name="subject" value="{% if latest_pitch %}{{ latest_pitch.subject }}{% else %}Quick growth idea for {{ lead.business_name }}{% endif %}" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Body</label>
+                            <textarea id="emailBodyInput" name="body" rows="6" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-800 dark:text-slate-200 font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500">{% if latest_pitch %}{{ latest_pitch.email_body }}{% else %}Hi {{ lead.business_name }} Team,
+
+I reviewed your website and noticed significant opportunities to capture more customer orders directly online.
+
+Would you be open to a quick 2-minute demo?
+
+Regards,
+{{ user.full_name|default:user.username }}{% endif %}</textarea>
+                        </div>
+                        {% if portfolio_ready %}
+                        <label class="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
+                            <input type="checkbox" name="include_portfolio" value="1" checked class="h-4 w-4 rounded border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-indigo-600">
+                            Add my live agency portfolio link (builds trust)
+                        </label>
+                        {% else %}
+                        <p class="text-[11px] text-slate-500">Tip: add projects in <a class="text-indigo-600 dark:text-indigo-400 underline" href="{% url 'portfolio:list' %}">My Portfolio</a> to include a live portfolio link in your pitches.</p>
+                        {% endif %}
+                        <button type="submit" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-indigo-600/25 transition flex items-center justify-center gap-2">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            Send Direct Email
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right: Log Inbound Client Response & Full Chat Thread -->
+            <div class="space-y-6">
+                <!-- Log Client Reply Form -->
+                <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl backdrop-blur-2xl space-y-4">
+                    <h3 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i data-lucide="message-square-plus" class="w-4 h-4 text-amber-500"></i>
+                        Record / Log Client Inbound Reply
+                    </h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">
+                        When the client messages you back on WhatsApp, email, or calls you, log their message here. Lead stage will automatically advance to <strong>Replied</strong> or <strong>Interested</strong>!
+                    </p>
+
+                    <form action="{% url 'outreach:log_reply' lead_id=lead.id %}" method="POST" class="space-y-3">
+                        {% csrf_token %}
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Channel</label>
+                                <select name="channel" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none">
+                                    <option value="WHATSAPP">WhatsApp Message</option>
+                                    <option value="EMAIL">Email Reply</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">New Stage</label>
+                                <select name="new_status" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none">
+                                    <option value="REPLIED" selected>Mark Stage: Replied</option>
+                                    <option value="INTERESTED">Mark Stage: Interested</option>
+                                    <option value="PROPOSAL">Mark Stage: Ready for Proposal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Client's Exact Reply / Notes</label>
+                            <textarea name="reply_text" rows="3" required placeholder="e.g. 'Yes Shahwaiz, we want online ordering! Can you show us a demo?'" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-3 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs shadow-lg shadow-amber-600/25 transition">
+                            Save Inbound Client Response
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Visual Conversation Stream -->
+                <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-xl backdrop-blur-2xl space-y-4">
+                    <h3 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="history" class="w-4 h-4 text-indigo-500"></i>
+                            Live Conversation History
+                        </span>
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ lead_messages.count }} Messages</span>
+                    </h3>
+
+                    <div class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                        {% for msg in lead_messages %}
+                        <div class="p-4 rounded-2xl border text-xs space-y-1.5 shadow-sm
+                            {% if msg.direction == 'INBOUND' %}
+                                bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-500/30 text-emerald-900 dark:text-emerald-100 ml-4
+                            {% else %}
+                                bg-slate-50 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mr-4
+                            {% endif %}">
+                            <div class="flex items-center justify-between">
+                                <span class="font-extrabold flex items-center gap-1.5
+                                    {% if msg.direction == 'INBOUND' %}text-emerald-600 dark:text-emerald-400{% else %}text-indigo-600 dark:text-indigo-400{% endif %}">
+                                    {% if msg.channel == 'WHATSAPP' %}<i data-lucide="message-circle" class="w-3.5 h-3.5"></i>{% else %}<i data-lucide="mail" class="w-3.5 h-3.5"></i>{% endif %}
+                                    {% if msg.direction == 'INBOUND' %}Client Inbound ({{ msg.sender }}){% else %}Outbound Sent to {{ msg.recipient }}{% endif %}
+                                </span>
+                                <span class="text-[10px] text-slate-500">{{ msg.created_at|date:"M d, H:i" }}</span>
+                            </div>
+                            {% if msg.subject %}
+                            <div class="font-bold text-slate-900 dark:text-white">Subject: {{ msg.subject }}</div>
+                            {% endif %}
+                            <p class="whitespace-pre-line leading-relaxed font-sans">{{ msg.body }}</p>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-10 text-xs text-slate-400">
+                            No messages exchanged with this lead yet. Use the senders on the left!
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function loadEmailTemplate(templateId) {
+        if (!templateId) return;
+        const leadId = "{{ lead.id }}";
+        fetch(`/outreach/templates/api/parse/${templateId}/${leadId}/`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const subjectEl = document.getElementById('emailSubjectInput');
+                    const bodyEl = document.getElementById('emailBodyInput');
+                    if (subjectEl) subjectEl.value = data.subject;
+                    if (bodyEl) bodyEl.value = data.body;
+                    
+                    // Visual feedback
+                    subjectEl.classList.add('ring-2', 'ring-indigo-500');
+                    bodyEl.classList.add('ring-2', 'ring-indigo-500');
+                    setTimeout(() => {
+                        subjectEl.classList.remove('ring-2', 'ring-indigo-500');
+                        bodyEl.classList.remove('ring-2', 'ring-indigo-500');
+                    }, 1200);
+                } else {
+                    alert('Could not load template: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching template:', err);
+            });
+    }
+</script>
+{% endblock %}

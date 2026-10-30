@@ -1,0 +1,223 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Leads Directory — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="space-y-6 w-full">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Leads Database</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">Manage, filter, and audit target prospective clients in {{ current_workspace.name }}</p>
+        </div>
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <a href="{% url 'leads:find_leads' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition transform hover:-translate-y-0.5">
+                <i data-lucide="radar" class="w-4 h-4 text-amber-300"></i>
+                Find Leads
+            </a>
+            <a href="{% url 'leads:import_csv' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs shadow-sm transition">
+                <i data-lucide="file-up" class="w-4 h-4"></i>
+                Import CSV
+            </a>
+            <a href="{% url 'leads:create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Add Lead
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Bar Card -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm dark:shadow-xl">
+        <form method="GET" action="{% url 'leads:list' %}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+            <!-- Search -->
+            <div class="lg:col-span-2 relative">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search business, email, phone, city..."
+                       class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <!-- Industry Filter -->
+            <div>
+                <select name="industry" onchange="this.form.submit()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">All Industries</option>
+                    {% for key, label in industries %}
+                    <option value="{{ key }}" {% if selected_industry == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Website Live Filter -->
+            <div>
+                <select name="live" onchange="this.form.submit()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">All Websites</option>
+                    <option value="yes" {% if selected_live == 'yes' %}selected{% endif %}>Live websites</option>
+                    <option value="no" {% if selected_live == 'no' %}selected{% endif %}>Dead / unreachable</option>
+                    <option value="unchecked" {% if selected_live == 'unchecked' %}selected{% endif %}>Not checked yet</option>
+                </select>
+            </div>
+
+            <!-- Opportunity Level Filter -->
+            <div>
+                <select name="level" onchange="this.form.submit()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">All Opportunities</option>
+                    {% for key, label in levels %}
+                    <option value="{{ key }}" {% if selected_level == key %}selected{% endif %}>{{ label }} Opportunity</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="flex gap-2">
+                <select name="status" onchange="this.form.submit()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-3.5 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">All Stages</option>
+                    {% for key, label in statuses %}
+                    <option value="{{ key }}" {% if selected_status == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if search_query or selected_industry or selected_level or selected_status or selected_live %}
+                <a href="{% url 'leads:list' %}" title="Clear filters" class="px-3 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs flex items-center justify-center shrink-0">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Leads Table Card -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm dark:shadow-xl">
+        {% if leads %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="text-slate-700 dark:text-slate-300 text-[11px] font-extrabold uppercase tracking-wider bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800">
+                        <th class="py-4 px-6 font-extrabold">Business Name &amp; Contact</th>
+                        <th class="py-4 px-4 font-extrabold">Industry</th>
+                        <th class="py-4 px-4 font-extrabold">Location</th>
+                        <th class="py-4 px-4 font-extrabold text-center">Opportunity Score</th>
+                        <th class="py-4 px-4 font-extrabold">Pipeline Stage</th>
+                        <th class="py-4 px-6 font-extrabold text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                    {% for lead in leads %}
+                    <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition group">
+                        <td class="py-4 px-6">
+                            <a href="{% url 'leads:detail' pk=lead.pk %}" class="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition block text-sm">
+                                {{ lead.business_name }}
+                            </a>
+                            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                {% if lead.website %}
+                                <a href="{{ lead.website }}" target="_blank" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+                                    <i data-lucide="globe" class="w-3 h-3 text-slate-400"></i>
+                                    {{ lead.website|truncatechars:28 }}
+                                </a>
+                                {% if lead.is_website_live == True %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">LIVE</span>
+                                {% elif lead.is_website_live == False %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30">DEAD</span>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-xs text-slate-400">No website</span>
+                                {% endif %}
+                                
+                                {% if lead.phone %}
+                                <span class="text-slate-300 dark:text-slate-600">•</span>
+                                <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                    <i data-lucide="phone" class="w-3 h-3 text-slate-400"></i>
+                                    {{ lead.phone }}
+                                </span>
+                                {% endif %}
+
+                                {% if lead.email %}
+                                <span class="text-slate-300 dark:text-slate-600">•</span>
+                                <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                    <i data-lucide="mail" class="w-3 h-3 text-slate-400"></i>
+                                    {{ lead.email }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 inline-block">
+                                {{ lead.get_industry_display }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 text-xs font-medium text-slate-600 dark:text-slate-400">
+                            {{ lead.city }}{% if lead.country %}, {{ lead.country }}{% endif %}
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            {% if lead.opportunity_score > 0 %}
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold
+                                    {% if lead.opportunity_level == 'HIGH' %}bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30
+                                    {% elif lead.opportunity_level == 'MEDIUM' %}bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30
+                                    {% else %}bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700{% endif %}">
+                                    {{ lead.opportunity_score }} • {{ lead.opportunity_level }}
+                                </span>
+                            {% else %}
+                                <a href="{% url 'scanner:scan_lead' lead_id=lead.id %}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/30 transition">
+                                    <i data-lucide="scan" class="w-3.5 h-3.5"></i> Run Audit
+                                </a>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold inline-block
+                                {% if lead.status == 'NEW' %}bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30
+                                {% elif lead.status == 'CONTACTED' %}bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30
+                                {% elif lead.status == 'INTERESTED' %}bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30
+                                {% elif lead.status == 'WON' %}bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30
+                                {% else %}bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700{% endif %}">
+                                {{ lead.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 text-right space-x-1.5 whitespace-nowrap">
+                            <a href="{% url 'scanner:scan_lead' lead_id=lead.id %}" title="Audit Website" class="inline-flex p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-600 dark:text-slate-300 transition shadow-sm">
+                                <i data-lucide="scan" class="w-4 h-4"></i>
+                            </a>
+                            <a href="{% url 'leads:detail' pk=lead.pk %}" title="View Details" class="inline-flex p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition shadow-sm">
+                                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                            </a>
+                            <a href="{% url 'leads:update' pk=lead.pk %}" title="Edit" class="inline-flex p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-900 dark:hover:text-white transition shadow-sm">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if leads.has_other_pages %}
+        <div class="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <div>
+                Showing page {{ leads.number }} of {{ leads.paginator.num_pages }} ({{ total_count }} total leads)
+            </div>
+            <div class="flex gap-2">
+                {% if leads.has_previous %}
+                <a href="?page={{ leads.previous_page_number }}" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold transition">Previous</a>
+                {% endif %}
+                {% if leads.has_next %}
+                <a href="?page={{ leads.next_page_number }}" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold transition">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-16">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4 text-indigo-500">
+                <i data-lucide="inbox" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">No leads match your criteria</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">Try clearing search filters or launch the Global Lead Discovery engine to find verified businesses.</p>
+            <div class="mt-5">
+                <a href="{% url 'leads:find_leads' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition">
+                    <i data-lucide="radar" class="w-4 h-4"></i>
+                    Launch Lead Discovery
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

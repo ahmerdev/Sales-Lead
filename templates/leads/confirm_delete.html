@@ -1,0 +1,27 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Delete Lead — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-12 space-y-6">
+    <div class="bg-slate-900/80 border border-rose-500/30 rounded-2xl p-6 backdrop-blur-xl space-y-4">
+        <div class="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
+            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+        <div>
+            <h2 class="text-lg font-bold text-white">Delete Lead?</h2>
+            <p class="text-xs text-slate-400 mt-1">Are you sure you want to permanently delete <strong class="text-white">{{ lead.business_name }}</strong>? Associated audits and proposals will also be removed.</p>
+        </div>
+
+        <form method="POST" class="pt-2 flex items-center justify-end gap-3">
+            {% csrf_token %}
+            <a href="{% url 'leads:detail' pk=lead.pk %}" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-xs">
+                Cancel
+            </a>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold">
+                Confirm Delete
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

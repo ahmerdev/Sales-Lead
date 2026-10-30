@@ -1,0 +1,192 @@
+{% extends 'base/base.html' %}
+
+{% block title %}CRM Pipeline Kanban — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-full">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Sales Pipeline Kanban</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">Advance leads through your agency client conversion funnel</p>
+        </div>
+        <div class="flex items-center gap-2.5">
+            <a href="{% url 'leads:find_leads' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs hover:border-slate-300 dark:hover:border-slate-700 transition shadow-sm">
+                <i data-lucide="radar" class="w-4 h-4 text-amber-500"></i>
+                Find Leads
+            </a>
+            <a href="{% url 'leads:create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Add Prospect
+            </a>
+        </div>
+    </div>
+
+    <!-- Kanban Board Columns -->
+    <div class="flex gap-4 overflow-x-auto pb-6 min-h-[70vh]">
+        <!-- NEW COLUMN -->
+        <div class="w-72 shrink-0 flex flex-col bg-white/80 dark:bg-slate-900/40 border border-slate-200/90 dark:border-slate-800/80 rounded-3xl p-4 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-slate-800">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">New Leads</span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">{{ counts.NEW }}</span>
+            </div>
+            <div class="flex-1 space-y-3 pt-3 overflow-y-auto">
+                {% for lead in columns.NEW %}
+                <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-2.5 hover:border-indigo-400 dark:hover:border-slate-700 transition shadow-sm">
+                    <div class="flex items-start justify-between">
+                        <a href="{% url 'leads:detail' pk=lead.pk %}" class="text-xs font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                            {{ lead.business_name }}
+                        </a>
+                        <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full">
+                            {{ lead.opportunity_score }}
+                        </span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span>{{ lead.city }}</span>
+                        <span class="font-semibold">{{ lead.get_industry_display }}</span>
+                    </div>
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[11px]">
+                        <a href="{% url 'crm:update_stage' lead_id=lead.id %}?status=CONTACTED" class="text-indigo-600 dark:text-indigo-400 hover:underline font-bold">
+                            &rarr; Contacted
+                        </a>
+                        <a href="{% url 'leads:detail' pk=lead.pk %}" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium">View</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8 text-xs text-slate-400">No new leads</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- CONTACTED COLUMN -->
+        <div class="w-72 shrink-0 flex flex-col bg-white/80 dark:bg-slate-900/40 border border-slate-200/90 dark:border-slate-800/80 rounded-3xl p-4 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-slate-800">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">Contacted</span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-blue-500/15 text-blue-600 dark:text-blue-400">{{ counts.CONTACTED }}</span>
+            </div>
+            <div class="flex-1 space-y-3 pt-3 overflow-y-auto">
+                {% for lead in columns.CONTACTED %}
+                <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-2.5 hover:border-blue-400 dark:hover:border-slate-700 transition shadow-sm">
+                    <div class="flex items-start justify-between">
+                        <a href="{% url 'leads:detail' pk=lead.pk %}" class="text-xs font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                            {{ lead.business_name }}
+                        </a>
+                        <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full">
+                            {{ lead.opportunity_score }}
+                        </span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span>{{ lead.city }}</span>
+                        <span class="font-semibold">{{ lead.get_industry_display }}</span>
+                    </div>
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[11px]">
+                        <a href="{% url 'crm:update_stage' lead_id=lead.id %}?status=INTERESTED" class="text-amber-600 dark:text-amber-400 hover:underline font-bold">
+                            &rarr; Interested
+                        </a>
+                        <a href="{% url 'leads:detail' pk=lead.pk %}" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium">View</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8 text-xs text-slate-400">None in contacted</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- INTERESTED COLUMN -->
+        <div class="w-72 shrink-0 flex flex-col bg-white/80 dark:bg-slate-900/40 border border-slate-200/90 dark:border-slate-800/80 rounded-3xl p-4 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-slate-800">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400">Interested</span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-400">{{ counts.INTERESTED }}</span>
+            </div>
+            <div class="flex-1 space-y-3 pt-3 overflow-y-auto">
+                {% for lead in columns.INTERESTED %}
+                <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-2.5 hover:border-amber-400 dark:hover:border-slate-700 transition shadow-sm">
+                    <div class="flex items-start justify-between">
+                        <a href="{% url 'leads:detail' pk=lead.pk %}" class="text-xs font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                            {{ lead.business_name }}
+                        </a>
+                        <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full">
+                            {{ lead.opportunity_score }}
+                        </span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span>{{ lead.city }}</span>
+                        <span class="font-semibold">{{ lead.get_industry_display }}</span>
+                    </div>
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[11px]">
+                        <a href="{% url 'proposals:create' lead_id=lead.id %}" class="text-indigo-600 dark:text-indigo-400 hover:underline font-bold">
+                            + Draft Proposal
+                        </a>
+                        <a href="{% url 'crm:update_stage' lead_id=lead.id %}?status=PROPOSAL" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium">&rarr; Proposal</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8 text-xs text-slate-400">None marked interested</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- PROPOSAL COLUMN -->
+        <div class="w-72 shrink-0 flex flex-col bg-white/80 dark:bg-slate-900/40 border border-slate-200/90 dark:border-slate-800/80 rounded-3xl p-4 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-slate-800">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400">Proposal Sent</span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-purple-500/15 text-purple-600 dark:text-purple-400">{{ counts.PROPOSAL }}</span>
+            </div>
+            <div class="flex-1 space-y-3 pt-3 overflow-y-auto">
+                {% for lead in columns.PROPOSAL %}
+                <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-2.5 hover:border-purple-400 dark:hover:border-slate-700 transition shadow-sm">
+                    <div class="flex items-start justify-between">
+                        <a href="{% url 'leads:detail' pk=lead.pk %}" class="text-xs font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                            {{ lead.business_name }}
+                        </a>
+                        <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                            {{ lead.opportunity_score }}
+                        </span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span>{{ lead.city }}</span>
+                        <span class="font-semibold">{{ lead.get_industry_display }}</span>
+                    </div>
+                    <div class="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[11px]">
+                        <a href="{% url 'crm:update_stage' lead_id=lead.id %}?status=WON" class="text-emerald-600 dark:text-emerald-400 hover:underline font-extrabold">
+                            ★ Mark Won!
+                        </a>
+                        <a href="{% url 'leads:detail' pk=lead.pk %}" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium">View</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8 text-xs text-slate-400">No proposals pending</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- WON COLUMN -->
+        <div class="w-72 shrink-0 flex flex-col bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-500/30 rounded-3xl p-4 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-emerald-200 dark:border-emerald-500/20">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Deals Won</span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">{{ counts.WON }}</span>
+            </div>
+            <div class="flex-1 space-y-3 pt-3 overflow-y-auto">
+                {% for lead in columns.WON %}
+                <div class="bg-white dark:bg-slate-900/90 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl p-4 space-y-2.5 hover:border-emerald-500 transition shadow-sm">
+                    <div class="flex items-start justify-between">
+                        <a href="{% url 'leads:detail' pk=lead.pk %}" class="text-xs font-bold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition">
+                            {{ lead.business_name }}
+                        </a>
+                        <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                            Client ✓
+                        </span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                        <span>{{ lead.city }}</span>
+                        <span class="font-semibold">{{ lead.get_industry_display }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8 text-xs text-slate-400">Close deals to see them here!</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

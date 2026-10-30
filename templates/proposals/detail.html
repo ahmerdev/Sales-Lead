@@ -1,0 +1,186 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Proposal — {{ proposal.client_name }}{% endblock %}
+
+{% block content %}
+<div class="w-full space-y-6">
+    <!-- Top toolbar -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 no-print">
+        <a href="{% url 'proposals:list' %}" class="text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold">&larr; Back to Proposals</a>
+        <div class="flex items-center gap-2">
+            <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                Print PDF
+            </button>
+            <a href="{% url 'proposals:send_whatsapp' pk=proposal.id %}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-600/25 transition">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                Send via WhatsApp
+            </a>
+            <form action="{% url 'proposals:send_email' pk=proposal.id %}" method="POST" class="inline-block">
+                {% csrf_token %}
+                <button type="submit" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/25 transition">
+                    <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                    Send via Email
+                </button>
+            </form>
+            {% if proposal.status != 'CANCELLED' %}
+            <form action="{% url 'proposals:cancel' pk=proposal.id %}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to cancel this proposal?')">
+                {% csrf_token %}
+                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs font-semibold transition" title="Cancel this proposal">
+                    <i data-lucide="ban" class="w-3.5 h-3.5"></i>
+                    Cancel Proposal
+                </button>
+            </form>
+            {% else %}
+            <form action="{% url 'proposals:cancel' pk=proposal.id %}" method="POST" class="inline-block">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reopen">
+                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-semibold transition">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                    Reopen Proposal
+                </button>
+            </form>
+            {% endif %}
+            <form action="{% url 'proposals:delete' pk=proposal.id %}" method="POST" class="inline-block" onsubmit="return confirm('Permanently delete this proposal?')">
+                {% csrf_token %}
+                <button type="submit" class="inline-flex items-center gap-1.5 p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-slate-800 transition" title="Delete Proposal">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if proposal.status == 'CANCELLED' %}
+    <!-- Cancelled Proposal Banner -->
+    <div class="p-4 sm:p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-800 dark:text-rose-200 flex items-center justify-between gap-3 no-print">
+        <div class="flex items-center gap-2.5">
+            <i data-lucide="alert-octagon" class="w-5 h-5 text-rose-500 shrink-0"></i>
+            <div>
+                <strong class="font-bold text-rose-600 dark:text-rose-400 text-sm">Proposal Status: CANCELLED</strong>
+                <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">This proposal has been marked as cancelled. External clients opening the link will see this notice.</p>
+            </div>
+        </div>
+        <form action="{% url 'proposals:cancel' pk=proposal.id %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reopen">
+            <button type="submit" class="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold text-xs shadow-sm border border-slate-200 dark:border-slate-700 transition shrink-0">
+                Reactivate As Draft
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Live Client Interactive Link Banner -->
+    <div class="p-6 rounded-3xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/30 text-xs space-y-3 no-print shadow-sm" x-data="{ copied: false }">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-bold">
+                <i data-lucide="link" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+                Shareable Interactive Client Link
+            </div>
+            <div class="text-[11px] text-slate-500 dark:text-slate-400">
+                {% if proposal.viewed_by_client_at %}
+                <span class="text-emerald-600 dark:text-emerald-400 font-bold">✓ Client viewed on {{ proposal.viewed_by_client_at|date:"M d, H:i" }}</span>
+                {% else %}
+                <span>Not yet viewed by client</span>
+                {% endif %}
+            </div>
+        </div>
+        <p class="text-slate-600 dark:text-slate-300">
+            Send this private link to your client. They can review your scope, ask questions, or click <strong>Accept Proposal</strong> online:
+        </p>
+        {% if local_link_warning %}
+        <p class="text-xs text-amber-700 dark:text-amber-300 mb-2">This link points to your own computer (localhost), so external clients cannot open it. Set your Public site URL in <a class="underline font-bold" href="{% url 'accounts:settings' %}?tab=agency">Settings</a>.</p>
+        {% endif %}
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <input type="text" readonly value="{{ public_url }}" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-2 text-indigo-600 dark:text-indigo-300 font-mono text-xs select-all shadow-sm">
+            <button @click="navigator.clipboard.writeText('{{ public_url }}'); copied = true; setTimeout(() => copied = false, 2500)"
+                    class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition shrink-0">
+                <span x-text="copied ? 'Copied Link!' : 'Copy Link'"></span>
+            </button>
+            <a href="{{ public_url }}" target="_blank" class="px-4 py-2.5 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-bold text-xs shadow-sm transition shrink-0">
+                Preview As Client &rarr;
+            </a>
+        </div>
+    </div>
+
+    {% if proposal.client_feedback %}
+    <!-- Client Feedback/Response Box -->
+    <div class="p-5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-xs text-emerald-200 no-print space-y-1">
+        <span class="font-bold text-emerald-400 flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            Client Response Received:
+        </span>
+        <p class="text-white italic text-sm">"{{ proposal.client_feedback }}"</p>
+    </div>
+    {% endif %}
+
+    <!-- Official Proposal Paper / Document (Point 14) -->
+    <div class="bg-white text-slate-900 rounded-3xl p-8 sm:p-12 shadow-2xl space-y-8 border border-slate-200" id="proposal-paper">
+        <!-- Document Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-8 gap-4">
+            <div>
+                <div class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-1">{{ user.agency_settings.display_agency_name|default:"Your Agency" }}</div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">WEBSITE & DIGITAL IMPROVEMENT PROPOSAL</h1>
+            </div>
+            <div class="sm:text-right text-xs text-slate-500 space-y-1">
+                <div>Date: <strong class="text-slate-800">{{ proposal.created_at|date:"F d, Y" }}</strong></div>
+                <div>Status: <span class="uppercase font-extrabold {% if proposal.status == 'CANCELLED' %}text-rose-600{% elif proposal.status == 'ACCEPTED' %}text-emerald-600{% elif proposal.status == 'SENT' %}text-indigo-600{% else %}text-amber-600{% endif %}">{{ proposal.get_status_display }}</span></div>
+            </div>
+        </div>
+
+        <!-- Client & Agency Info -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Prepared For</div>
+                <div class="text-base font-bold text-slate-900">{{ proposal.client_name }}</div>
+                <div class="text-xs text-slate-500">{{ proposal.lead.website|default:proposal.client_name }}</div>
+                <div class="text-xs text-slate-500">{{ proposal.lead.city }}, {{ proposal.lead.country }}</div>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Prepared By</div>
+                <div class="text-base font-bold text-slate-900">{{ user.full_name|default:user.username }}</div>
+                <div class="text-xs text-slate-500">{{ current_workspace.name }}</div>
+                <div class="text-xs text-slate-500">Digital Growth Partner</div>
+            </div>
+        </div>
+
+        <!-- Scope of Services (Point 14) -->
+        <div class="space-y-4">
+            <h2 class="text-lg font-bold text-slate-900 border-b border-slate-200 pb-2">Proposed Deliverables & Solutions</h2>
+            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/80 text-sm text-slate-700 whitespace-pre-line leading-relaxed font-sans">
+{{ proposal.scope_summary }}
+            </div>
+        </div>
+
+        <!-- Project Schedule & Pricing (Point 14) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+            <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                <div class="text-xs font-bold uppercase text-slate-400">Estimated Timeline</div>
+                <div class="text-2xl font-bold text-slate-900">{{ proposal.timeline }}</div>
+                <p class="text-xs text-slate-500">Including staging, responsive testing, and client review period.</p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-indigo-50 border border-indigo-100 space-y-2">
+                <div class="text-xs font-bold uppercase text-indigo-500">Total Investment</div>
+                <div class="text-3xl font-extrabold text-indigo-700">{{ proposal.currency }} {{ proposal.investment_amount }}</div>
+                <p class="text-xs text-indigo-600/80">{{ proposal.notes }}</p>
+            </div>
+        </div>
+
+        <!-- Acceptance Signature Line -->
+        <div class="pt-8 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-8 text-xs text-slate-500">
+            <div class="space-y-6">
+                <div>Client Representative Signature:</div>
+                <div class="border-b border-slate-300 w-3/4 h-8"></div>
+                <div>Date: ________________________</div>
+            </div>
+            <div class="space-y-6">
+                <div>Agency Authorized Signature:</div>
+                <div class="border-b border-slate-300 w-3/4 h-8"></div>
+                <div>Date: ________________________</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

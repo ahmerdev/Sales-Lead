@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LeadRadar AI — Intelligent B2B Lead &amp; Opportunity Engine{% endblock %}</title>
+    
+    <!-- Inline Theme Initializer (prevents flash of wrong theme) -->
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        } else {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+        }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#FF5B26',
+                            coral: '#FF6A3D',
+                            dark: '#111827',
+                            surface: '#F4F5F8',
+                            darkSurface: '#090D16',
+                        }
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                        '5xl': '2.5rem',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .heading-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        [x-cloak] { display: none !important; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Diagonal Stripe Pattern for Bar Chart */
+        .chart-striped-bar {
+            background-image: repeating-linear-gradient(
+                -45deg,
+                rgba(255, 255, 255, 0.25),
+                rgba(255, 255, 255, 0.25) 4px,
+                transparent 4px,
+                transparent 8px
+            );
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full antialiased overflow-hidden flex bg-[#F4F5F8] dark:bg-[#090D16] text-slate-800 dark:text-slate-100 transition-colors duration-200 select-none" 
+      x-data="{ 
+          sidebarOpen: false, 
+          sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true',
+          isDark: document.documentElement.classList.contains('dark'),
+          toggleSidebar() {
+              this.sidebarCollapsed = !this.sidebarCollapsed;
+              localStorage.setItem('sidebar_collapsed', this.sidebarCollapsed);
+              this.$nextTick(() => lucide.createIcons());
+          },
+          toggleTheme() {
+              this.isDark = !this.isDark;
+              if (this.isDark) {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.classList.remove('light');
+                  localStorage.setItem('theme', 'dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.classList.add('light');
+                  localStorage.setItem('theme', 'light');
+              }
+              this.$nextTick(() => lucide.createIcons());
+          }
+      }">
+
+    {% if user.is_authenticated %}
+    <!-- Left Detached Floating Dock / Expandable Sidebar -->
+    <aside :class="sidebarCollapsed ? 'w-20 items-center px-2.5' : 'w-64 items-stretch px-4'" 
+           class="hidden lg:flex lg:flex-col justify-between my-3 ml-3 py-4 rounded-[28px] border border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-[#111827]/90 backdrop-blur-2xl shrink-0 z-20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] transition-all duration-300 ease-in-out">
+        
+        <!-- Top Dock Controls: Sun/Moon Mode Switcher & Collapse Toggle Button -->
+        <div class="flex items-center w-full" :class="sidebarCollapsed ? 'flex-col gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800/80' : 'justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80'">
+            
+            <!-- Sun / Moon Mode Switcher Capsule -->
+            <div class="flex items-center p-1 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 transition shadow-inner"
+                 :class="sidebarCollapsed ? 'flex-col gap-1' : 'flex-row gap-1'">
+                <button @click="if (isDark) toggleTheme()" 
+                        type="button" 
+                        title="Light Mode" 
+                        class="w-7 h-7 rounded-full flex items-center justify-center transition"
+                        :class="!isDark ? 'bg-white text-amber-500 shadow-sm' : 'text-slate-400 hover:text-slate-200'">
+                    <!-- Real Sun SVG -->
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2"></path>
+                        <path d="M12 20v2"></path>
+                        <path d="m4.93 4.93 1.41 1.41"></path>
+                        <path d="m17.66 17.66 1.41 1.41"></path>
+                        <path d="M2 12h2"></path>
+                        <path d="M20 12h2"></path>
+                        <path d="m6.34 17.66-1.41 1.41"></path>
+                        <path d="m19.07 4.93-1.41 1.41"></path>
+                    </svg>
+                </button>
+                <button @click="if (!isDark) toggleTheme()" 
+                        type="button" 
+                        title="Dark Mode" 
+                        class="w-7 h-7 rounded-full flex items-center justify-center transition"
+                        :class="isDark ? 'bg-slate-900 text-indigo-400 shadow-sm' : 'text-slate-400 hover:text-slate-600'">
+                    <!-- Real Moon SVG -->
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Collapse / Expand Toggle Button -->
+            <button @click="toggleSidebar()" 
+                    type="button" 
+                    :title="sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'"
+                    class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition shadow-sm">
+                <span x-show="sidebarCollapsed">
+                    <!-- Right Arrow / Expand SVG -->
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                </span>
+                <span x-show="!sidebarCollapsed" x-cloak>
+                    <!-- Left Arrow / Collapse SVG -->
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                </span>
+            </button>
+        </div>
+
+        <!-- Middle Dock: Navigation Links (Collapsible & Expandable) -->
+        <nav class="flex flex-col gap-1.5 my-auto overflow-y-auto py-2">
+            
+            <!-- 1. Dashboard Grid -->
+            <a href="{% url 'dashboard:index' %}" 
+               :title="sidebarCollapsed ? 'Overview Dashboard' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="flex items-center gap-3 rounded-2xl transition shadow-sm font-bold text-xs {% if request.resolver_match.app_name == 'dashboard' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md{% else %}text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+                <i data-lucide="layout-grid" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>Overview Dashboard</span>
+            </a>
+
+            <!-- 2. Lead Discovery / Radar -->
+            <a href="{% url 'leads:find_leads' %}" 
+               :title="sidebarCollapsed ? 'Discover Leads' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="flex items-center gap-3 rounded-2xl transition font-bold text-xs {% if request.resolver_match.url_name == 'find_leads' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md{% else %}text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+                <i data-lucide="radar" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>Discover Leads</span>
+            </a>
+
+            <!-- 3. All Leads Database -->
+            <a href="{% url 'leads:list' %}" 
+               :title="sidebarCollapsed ? 'All Prospects & Leads' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="flex items-center gap-3 rounded-2xl transition font-bold text-xs {% if request.resolver_match.app_name == 'leads' and request.resolver_match.url_name != 'find_leads' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md{% else %}text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+                <i data-lucide="users" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>All Prospects</span>
+            </a>
+
+            <!-- 4. Client Communications Inbox -->
+            <a href="{% url 'outreach:inbox' %}" 
+               :title="sidebarCollapsed ? 'Client Inbox (WhatsApp & Email)' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="flex items-center gap-3 rounded-2xl transition font-bold text-xs {% if request.resolver_match.url_name == 'inbox' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md{% else %}text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+                <i data-lucide="mail" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>Communications Inbox</span>
+            </a>
+
+            <!-- 5. Website Scanner / Audits -->
+            <a href="{% url 'scanner:index' %}" 
+               :title="sidebarCollapsed ? 'Website Audits' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="flex items-center gap-3 rounded-2xl transition font-bold text-xs {% if request.resolver_match.app_name == 'scanner' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md{% else %}text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+                <i data-lucide="scan" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>Website Audits</span>
+            </a>
+
+            <!-- 6. Client Proposals -->
+            <a href="{% url 'proposals:list' %}" 
+               :title="sidebarCollapsed ? 'Client Proposals & Quotes' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="flex items-center gap-3 rounded-2xl transition font-bold text-xs {% if request.resolver_match.app_name == 'proposals' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md{% else %}text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+                <i data-lucide="file-check-2" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>Client Proposals</span>
+            </a>
+
+            <!-- 7. CRM Sales Pipeline Kanban -->
+            <a href="{% url 'crm:kanban' %}" 
+               :title="sidebarCollapsed ? 'CRM Pipeline Kanban' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="flex items-center gap-3 rounded-2xl transition font-bold text-xs {% if request.resolver_match.app_name == 'crm' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md{% else %}text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+                <i data-lucide="kanban" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>Sales Kanban</span>
+            </a>
+
+            <!-- 8. Agency Showcase Portfolio -->
+            <a href="{% url 'portfolio:list' %}" 
+               :title="sidebarCollapsed ? 'Agency Portfolio Manager' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="flex items-center gap-3 rounded-2xl transition font-bold text-xs {% if request.resolver_match.app_name == 'portfolio' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md{% else %}text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+                <i data-lucide="layers" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>Agency Portfolio</span>
+            </a>
+
+            <!-- 9. Settings & Branding -->
+            <a href="{% url 'accounts:settings' %}" 
+               :title="sidebarCollapsed ? 'Settings & Branding' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="flex items-center gap-3 rounded-2xl transition font-bold text-xs {% if request.resolver_match.url_name == 'settings' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md{% else %}text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80{% endif %}">
+                <i data-lucide="settings" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>Settings &amp; Branding</span>
+            </a>
+
+            {% if user.is_superuser %}
+            <!-- Super Admin HQ -->
+            <a href="{% url 'accounts:super_admin' %}" 
+               :title="sidebarCollapsed ? 'Super Admin HQ' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="flex items-center gap-3 rounded-2xl transition font-bold text-xs text-amber-500 hover:bg-amber-500/10 {% if request.resolver_match.url_name == 'super_admin' %}bg-amber-500 text-white shadow-md{% endif %}">
+                <i data-lucide="shield-alert" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>Super Admin HQ</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        <!-- Bottom Dock: Help & Logout (Stacked vertically in expanded mode, centered icons in collapsed mode) -->
+        <div class="flex flex-col gap-1.5 pt-3 border-t border-slate-100 dark:border-slate-800/80 w-full"
+             :class="sidebarCollapsed ? 'items-center' : 'items-stretch'">
+            <button type="button" 
+                    :title="sidebarCollapsed ? 'Help &amp; Documentation' : ''" 
+                    @click="window.open('https://wa.me/923062180602', '_blank')"
+                    :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+                    class="rounded-2xl flex items-center gap-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80 font-bold text-xs transition">
+                <i data-lucide="help-circle" class="w-5 h-5 shrink-0"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate" x-cloak>Help Center</span>
+            </button>
+            <a href="{% url 'logout' %}" 
+               :title="sidebarCollapsed ? 'Log Out' : ''" 
+               :class="sidebarCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'w-full px-3.5 py-2.5'"
+               class="rounded-2xl flex items-center gap-3 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold text-xs transition">
+                <i data-lucide="log-out" class="w-5 h-5 shrink-0 text-rose-500"></i>
+                <span x-show="!sidebarCollapsed" class="whitespace-nowrap truncate text-rose-500" x-cloak>Log Out</span>
+            </a>
+        </div>
+    </aside>
+    {% endif %}
+
+    <!-- Main Content Frame -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden p-2 sm:p-3 transition-colors duration-200">
+        
+        {% if user.is_authenticated %}
+        <!-- Top Modern Navigation Bar (Matching Finexy floating top bar in screenshot) -->
+        <header class="h-16 px-4 sm:px-6 flex items-center justify-between shrink-0 z-10 mb-2 transition-colors">
+            
+            <!-- Left: Brand Logo Capsule & Sidebar Toggle -->
+            <div class="flex items-center gap-2.5">
+                <button class="lg:hidden p-2 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300" @click="sidebarOpen = !sidebarOpen">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+
+                <!-- Desktop Sidebar Collapse Toggle Button -->
+                <button @click="toggleSidebar()" 
+                        type="button" 
+                        class="hidden lg:flex p-2 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 transition shadow-sm" 
+                        :title="sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                        <line x1="9" x2="9" y1="3" y2="21"/>
+                    </svg>
+                </button>
+
+                <a href="{% url 'dashboard:index' %}" class="flex items-center gap-2.5 group">
+                    <div class="w-9 h-9 rounded-2xl bg-[#FF5B26] flex items-center justify-center text-white shadow-md shadow-[#FF5B26]/25 group-hover:scale-105 transition-transform">
+                        <!-- Real Modern Radar Vector SVG -->
+                        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19.07 4.93a10 10 0 0 0-14.14 0"/>
+                            <path d="M16.24 7.76a6 6 0 0 0-8.48 0"/>
+                            <circle cx="12" cy="12" r="2"/>
+                            <path d="m12 12 5-5"/>
+                        </svg>
+                    </div>
+                    <span class="font-black text-xl tracking-tight text-slate-900 dark:text-white heading-font">LeadRadar</span>
+                </a>
+            </div>
+
+            <!-- Center: Floating Pill Navigation Tabs (Overview, Activity, Manage, etc.) -->
+            <div class="hidden md:flex items-center gap-1 p-1 rounded-full bg-white/90 dark:bg-[#111827]/90 border border-slate-200/80 dark:border-slate-800/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] backdrop-blur-xl">
+                <!-- Overview Tab -->
+                <a href="{% url 'dashboard:index' %}" 
+                   class="px-5 py-2 rounded-full text-xs font-bold transition-all duration-200
+                   {% if request.resolver_match.app_name == 'dashboard' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %}">
+                    Overview
+                </a>
+
+                <!-- Leads Tab -->
+                <a href="{% url 'leads:list' %}" 
+                   class="px-5 py-2 rounded-full text-xs font-bold transition-all duration-200
+                   {% if request.resolver_match.app_name == 'leads' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %}">
+                    Leads
+                </a>
+
+                <!-- Audits Tab -->
+                <a href="{% url 'scanner:index' %}" 
+                   class="px-5 py-2 rounded-full text-xs font-bold transition-all duration-200
+                   {% if request.resolver_match.app_name == 'scanner' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %}">
+                    Audits
+                </a>
+
+                <!-- Proposals Tab -->
+                <a href="{% url 'proposals:list' %}" 
+                   class="px-5 py-2 rounded-full text-xs font-bold transition-all duration-200
+                   {% if request.resolver_match.app_name == 'proposals' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %}">
+                    Proposals
+                </a>
+
+                <!-- Outreach / Inbox Tab -->
+                <a href="{% url 'outreach:inbox' %}" 
+                   class="px-5 py-2 rounded-full text-xs font-bold transition-all duration-200
+                   {% if request.resolver_match.app_name == 'outreach' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %}">
+                    Outreach
+                </a>
+
+                <!-- Reports Tab -->
+                <a href="{% url 'reports:index' %}" 
+                   class="px-5 py-2 rounded-full text-xs font-bold transition-all duration-200
+                   {% if request.resolver_match.app_name == 'reports' %}bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm{% else %}text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %}">
+                    Reports
+                </a>
+            </div>
+
+            <!-- Right Controls: Search, Bell, Info & User Profile Pill -->
+            <div class="flex items-center gap-2.5">
+                
+                <!-- Quick Search Trigger -->
+                <div class="relative" x-data="{ searchOpen: false }">
+                    <button @click="searchOpen = !searchOpen" 
+                            type="button" 
+                            title="Search Leads"
+                            class="w-10 h-10 rounded-full bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition shadow-sm">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- Search Modal Dropdown -->
+                    <div x-show="searchOpen" 
+                         @click.away="searchOpen = false" 
+                         x-cloak 
+                         class="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 p-3 shadow-2xl z-50">
+                        <form action="{% url 'leads:list' %}" method="GET">
+                            <input type="text" name="q" placeholder="Type city, industry, business name..." 
+                                   class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FF5B26]">
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Notification Bell with Orange Dot -->
+                <div class="relative" x-data="{ notifOpen: false, unreadCount: 3 }">
+                    <button @click="notifOpen = !notifOpen" 
+                            type="button" 
+                            title="Notifications"
+                            class="relative w-10 h-10 rounded-full bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition shadow-sm">
+                        <i data-lucide="bell" class="w-4 h-4"></i>
+                        <span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#FF5B26] ring-2 ring-white dark:ring-[#111827]"></span>
+                    </button>
+
+                    <!-- Notification Dropdown Panel -->
+                    <div x-show="notifOpen" 
+                         @click.away="notifOpen = false" 
+                         x-cloak
+                         class="absolute right-0 mt-2 w-80 sm:w-96 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] p-5 shadow-2xl z-50 backdrop-blur-2xl">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                            <span class="font-extrabold text-sm text-slate-900 dark:text-white">Live Alerts</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FF5B26]/10 text-[#FF5B26]">3 New</span>
+                        </div>
+                        <div class="space-y-2.5 py-3">
+                            <a href="{% url 'leads:list' %}" class="flex items-start gap-3 p-2 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                                <span class="w-2 h-2 rounded-full bg-[#FF5B26] mt-1.5 shrink-0"></span>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-200">New Targeted Leads Discovered</p>
+                                    <p class="text-[11px] text-slate-500">14 verified businesses added to pipeline</p>
+                                </div>
+                            </a>
+                            <a href="{% url 'proposals:list' %}" class="flex items-start gap-3 p-2 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Proposal Viewed by Client</p>
+                                    <p class="text-[11px] text-slate-500">Saffron Bistro reviewed scope</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
+                            <a href="{% url 'outreach:inbox' %}" class="text-xs font-bold text-[#FF5B26] hover:underline">Open Client Inbox &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info (i) Button -->
+                <button type="button" 
+                        @click="window.open('{% url 'public_portfolio' slug=current_workspace.slug %}', '_blank')"
+                        title="View Public Portfolio"
+                        class="w-10 h-10 rounded-full bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition shadow-sm">
+                    <i data-lucide="info" class="w-4 h-4"></i>
+                </button>
+
+                <!-- User Profile Pill (Avatar + Full Name + Email + Caret) -->
+                <div class="relative" x-data="{ userMenuOpen: false }">
+                    <button @click="userMenuOpen = !userMenuOpen" 
+                            type="button" 
+                            class="flex items-center gap-2.5 pl-1.5 pr-3 py-1 rounded-full bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-slate-300 transition">
+                        <!-- Avatar circle with user initials / photo -->
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF5B26] to-[#FF8C66] text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-sm">
+                            {{ user.full_name|default:user.username|slice:":1"|upper }}
+                        </div>
+                        <div class="text-left hidden sm:block">
+                            <p class="text-xs font-extrabold text-slate-900 dark:text-white leading-tight">
+                                {{ user.full_name|default:user.username }}
+                            </p>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-none">
+                                {{ user.email|truncatechars:18 }}
+                            </p>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </button>
+
+                    <!-- User Menu Dropdown -->
+                    <div x-show="userMenuOpen" 
+                         @click.away="userMenuOpen = false" 
+                         x-cloak 
+                         class="absolute right-0 mt-2 w-56 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 p-2 shadow-2xl z-50 space-y-1">
+                        <a href="{% url 'accounts:settings' %}" class="flex items-center gap-2.5 px-3 py-2 rounded-2xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            <i data-lucide="user" class="w-4 h-4 text-[#FF5B26]"></i>
+                            <span>My Profile &amp; Branding</span>
+                        </a>
+                        <a href="{% url 'portfolio:list' %}" class="flex items-center gap-2.5 px-3 py-2 rounded-2xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            <i data-lucide="briefcase" class="w-4 h-4 text-emerald-500"></i>
+                            <span>Agency Case Studies</span>
+                        </a>
+                        <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+                        <a href="{% url 'logout' %}" class="flex items-center gap-2.5 px-3 py-2 rounded-2xl text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            <span>Log Out</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+        {% endif %}
+
+        <!-- Toast Messages -->
+        {% if messages %}
+        <div class="px-4 sm:px-6 pb-2 shrink-0 space-y-2">
+            {% for message in messages %}
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 6000)" 
+                 class="flex items-center justify-between p-3.5 rounded-2xl border text-sm shadow-lg transition
+                 {% if message.tags == 'success' %}bg-emerald-500/15 border-emerald-500/30 text-emerald-800 dark:text-emerald-200
+                 {% elif message.tags == 'error' %}bg-rose-500/15 border-rose-500/30 text-rose-800 dark:text-rose-200
+                 {% elif message.tags == 'warning' %}bg-amber-500/15 border-amber-500/30 text-amber-800 dark:text-amber-200
+                 {% else %}bg-[#FF5B26]/10 border-[#FF5B26]/30 text-[#FF5B26] dark:text-[#FF8C66]{% endif %}">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
+                    <span>{{ message }}</span>
+                </div>
+                <button @click="show = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Main Body Scroll Area -->
+        <main class="flex-1 overflow-y-auto px-4 sm:px-6 pb-6">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div x-show="sidebarOpen" x-cloak class="fixed inset-0 z-50 lg:hidden flex">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="sidebarOpen = false"></div>
+        <div class="relative w-72 bg-white dark:bg-[#111827] h-full p-5 flex flex-col border-r border-slate-200 dark:border-slate-800 shadow-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-[#FF5B26] flex items-center justify-center text-white font-bold">
+                        <i data-lucide="radar" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-black text-slate-900 dark:text-white text-base heading-font">LeadRadar AI</span>
+                </div>
+                <button @click="sidebarOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <nav class="space-y-1.5 py-4 overflow-y-auto flex-1 text-sm">
+                <a href="{% url 'dashboard:index' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold">Dashboard</a>
+                <a href="{% url 'leads:find_leads' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">Find Leads</a>
+                <a href="{% url 'leads:list' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">All Leads</a>
+                <a href="{% url 'scanner:index' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">Website Audits</a>
+                <a href="{% url 'opportunities:index' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">Opportunity Engine</a>
+                <a href="{% url 'outreach:inbox' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">Client Inbox</a>
+                <a href="{% url 'outreach:templates_list' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">Email Templates</a>
+                <a href="{% url 'outreach:campaigns' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">Campaigns</a>
+                <a href="{% url 'crm:kanban' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">CRM Kanban</a>
+                <a href="{% url 'proposals:list' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">Proposals</a>
+                <a href="{% url 'reports:index' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">Reports</a>
+                <a href="{% url 'portfolio:list' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">My Portfolio</a>
+                <a href="{% url 'accounts:settings' %}" class="block px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium">Settings &amp; Branding</a>
+                {% if user.is_superuser %}
+                <a href="{% url 'accounts:super_admin' %}" class="block px-3 py-2 rounded-xl text-amber-500 hover:bg-amber-500/10 font-bold border border-amber-500/30">Super Admin HQ</a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

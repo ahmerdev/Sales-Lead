@@ -1,0 +1,102 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Website Health Audits — LeadRadar AI{% endblock %}
+
+{% block content %}
+<div class="space-y-6 w-full">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Website Health Audits</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">Live technical and conversion scan history across target businesses</p>
+        </div>
+        <a href="{% url 'leads:find_leads' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition self-start sm:self-center">
+            <i data-lucide="radar" class="w-4 h-4 text-amber-300"></i>
+            Find &amp; Audit Leads
+        </a>
+    </div>
+
+    <div class="bg-white/95 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm dark:shadow-xl backdrop-blur-2xl">
+        {% if audits %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-wider bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200/80 dark:border-slate-800">
+                        <th class="py-4 px-6 font-bold">Lead / Business</th>
+                        <th class="py-4 px-4 font-bold text-center">SSL</th>
+                        <th class="py-4 px-4 font-bold text-center">Mobile</th>
+                        <th class="py-4 px-4 font-bold text-center">WhatsApp CTA</th>
+                        <th class="py-4 px-4 font-bold text-center">Ordering</th>
+                        <th class="py-4 px-4 font-bold text-center">Booking</th>
+                        <th class="py-4 px-4 font-bold text-center">Score</th>
+                        <th class="py-4 px-6 font-bold text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                    {% for a in audits %}
+                    <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                        <td class="py-4 px-6">
+                            <a href="{% url 'leads:detail' pk=a.lead.id %}" class="font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition block text-sm">
+                                {{ a.lead.business_name }}
+                            </a>
+                            <span class="text-xs text-slate-400 font-mono">{{ a.scanned_url|truncatechars:38 }}</span>
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            {% if a.is_ssl %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">✓</span>
+                            {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-extrabold text-sm">✕</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            {% if a.is_mobile_responsive %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">✓</span>
+                            {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-extrabold text-sm">✕</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            {% if a.has_whatsapp_cta %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">✓</span>
+                            {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-extrabold text-sm">✕</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            {% if a.has_online_ordering %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">✓</span>
+                            {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-extrabold text-sm">✕</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            {% if a.has_online_booking %}
+                            <span class="text-emerald-600 dark:text-emerald-400 font-extrabold text-sm">✓</span>
+                            {% else %}
+                            <span class="text-rose-600 dark:text-rose-400 font-extrabold text-sm">✕</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-4 text-center font-extrabold text-amber-600 dark:text-amber-400">
+                            {{ a.lead.opportunity_score }} pts
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <a href="{% url 'leads:detail' pk=a.lead.id %}" class="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 hover:text-white text-xs font-bold text-slate-700 dark:text-slate-300 transition shadow-sm inline-block">
+                                View Report &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3 text-indigo-500">
+                <i data-lucide="scan" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">No audits performed yet</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">Open any lead from your database and run the Website Scanner.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

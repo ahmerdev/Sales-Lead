@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Agency Workspace — LeadRadar AI</title>
+    
+    <!-- Theme Initializer -->
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        } else {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+        }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .heading-font { font-family: 'Space Grotesk', sans-serif; }
+        [x-cloak] { display: none !important; }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.35; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.06); }
+        }
+        .animate-glow { animation: pulseGlow 6s ease-in-out infinite; }
+    </style>
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-indigo-500 selection:text-white transition-colors duration-200 overflow-x-hidden"
+      x-data="{
+          isDark: document.documentElement.classList.contains('dark'),
+          showPassword: false,
+          toggleTheme() {
+              this.isDark = !this.isDark;
+              if (this.isDark) {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.classList.remove('light');
+                  localStorage.setItem('theme', 'dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.classList.add('light');
+                  localStorage.setItem('theme', 'light');
+              }
+              this.$nextTick(() => lucide.createIcons());
+          }
+      }">
+
+    <div class="min-h-full flex flex-col lg:flex-row">
+        
+        <!-- Left Column: Registration Form Container -->
+        <div class="flex-1 flex flex-col justify-between p-6 sm:p-10 lg:p-14 xl:p-16 max-w-2xl mx-auto w-full z-10">
+            
+            <!-- Top Branding & Theme Switcher Bar -->
+            <div class="flex items-center justify-between mb-6 sm:mb-8">
+                <a href="{% url 'login' %}" class="flex items-center gap-3 group">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30 group-hover:scale-105 transition-transform duration-200">
+                        <i data-lucide="radar" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white heading-font">LeadRadar<span class="text-indigo-600 dark:text-indigo-400">AI</span></span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                                Agency Setup
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">B2B Lead Discovery &amp; Deal Engine</p>
+                    </div>
+                </a>
+
+                <!-- Theme Switcher Button -->
+                <button @click="toggleTheme()" 
+                        type="button" 
+                        class="w-10 h-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-500/40 transition shadow-sm flex items-center justify-center shrink-0"
+                        title="Toggle Light / Dark Mode">
+                    <span x-show="isDark" class="flex items-center justify-center">
+                        <i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+                    </span>
+                    <span x-show="!isDark" x-cloak class="flex items-center justify-center">
+                        <i data-lucide="moon" class="w-4 h-4 text-indigo-600"></i>
+                    </span>
+                </button>
+            </div>
+
+            <!-- Central Form Box -->
+            <div class="my-auto py-2 space-y-5">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight heading-font">
+                        Create Agency Workspace
+                    </h1>
+                    <p class="mt-1.5 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Start discovering local business leads, auditing outdated websites, and closing client deals.
+                    </p>
+                </div>
+
+                <!-- Super Admin Approval Notice Badge -->
+                <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2.5 shadow-sm">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-amber-500 shrink-0"></i>
+                    <span><strong>Super Admin Protected:</strong> New agency accounts undergo instant administrative verification before granting login access.</span>
+                </div>
+
+                <!-- Errors Display -->
+                {% if form.errors %}
+                <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs sm:text-sm space-y-1">
+                    <div class="font-bold flex items-center gap-1.5">
+                        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                        Please correct the following errors:
+                    </div>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <div class="pl-5">&bull; {{ field.label }}: {{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <div class="pl-5">&bull; {{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Registration Form -->
+                <form method="POST" action="{% url 'register' %}" class="space-y-4">
+                    {% csrf_token %}
+
+                    <!-- Full Name -->
+                    <div class="space-y-1.5">
+                        <label for="id_full_name" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Full Name
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </div>
+                            <input type="text" 
+                                   name="full_name" 
+                                   id="id_full_name" 
+                                   value="{{ form.full_name.value|default:'' }}"
+                                   required 
+                                   placeholder="Shahwaiz Khan"
+                                   class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Work Email -->
+                    <div class="space-y-1.5">
+                        <label for="id_email" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Work Email Address
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i data-lucide="mail" class="w-4 h-4"></i>
+                            </div>
+                            <input type="email" 
+                                   name="email" 
+                                   id="id_email" 
+                                   value="{{ form.email.value|default:'' }}"
+                                   required 
+                                   placeholder="name@agency.com"
+                                   class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Passwords Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label for="id_password" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                                Password
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="lock" class="w-4 h-4"></i>
+                                </div>
+                                <input :type="showPassword ? 'text' : 'password'" 
+                                       name="password" 
+                                       id="id_password" 
+                                       required 
+                                       placeholder="••••••••"
+                                       class="w-full pl-10 pr-10 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
+                                <button type="button" 
+                                        @click="showPassword = !showPassword" 
+                                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5" x-show="!showPassword"></i>
+                                    <i data-lucide="eye-off" class="w-3.5 h-3.5" x-show="showPassword" x-cloak></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label for="id_password_confirm" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                                Confirm Password
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                </div>
+                                <input :type="showPassword ? 'text' : 'password'" 
+                                       name="password_confirm" 
+                                       id="id_password_confirm" 
+                                       required 
+                                       placeholder="••••••••"
+                                       class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/30 transition-all duration-200 transform hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-4">
+                        <span>Launch Agency Workspace</span>
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    </button>
+                </form>
+
+                <!-- Login Prompt -->
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-800/80 text-center">
+                    <p class="text-xs text-slate-600 dark:text-slate-400">
+                        Already have an agency account?
+                        <a href="{% url 'login' %}" class="font-extrabold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1 ml-1">
+                            Sign In to Account &rarr;
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pt-6 border-t border-slate-200 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+                <span>By registering, you agree to our Terms of Service.</span>
+                <span>🔒 Secure 256-Bit SSL</span>
+            </div>
+        </div>
+
+        <!-- Right Column: Visual Product Showcase -->
+        <div class="hidden lg:flex flex-1 relative bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 p-12 xl:p-16 flex-col justify-between overflow-hidden border-l border-slate-800/80 text-white select-none">
+            
+            <div class="absolute -top-32 -right-32 w-96 h-96 bg-indigo-600/25 rounded-full blur-[110px] animate-glow pointer-events-none"></div>
+            <div class="absolute top-1/2 -left-20 w-80 h-80 bg-cyan-500/20 rounded-full blur-[120px] animate-glow pointer-events-none" style="animation-delay: 2.5s;"></div>
+
+            <div class="relative z-10 flex items-center justify-between">
+                <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/10 text-white border border-white/20 backdrop-blur-md">
+                    <i data-lucide="shield" class="w-3.5 h-3.5 text-indigo-400"></i>
+                    Enterprise Agency Security
+                </span>
+                <span class="text-xs text-indigo-300 font-semibold">Instant Setup</span>
+            </div>
+
+            <div class="relative z-10 my-auto py-8 space-y-6 max-w-lg mx-auto w-full">
+                <div>
+                    <h2 class="text-3xl xl:text-4xl font-black tracking-tight leading-tight heading-font">
+                        Your Complete Agency 
+                        <span class="bg-gradient-to-r from-indigo-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent">
+                            Client Acquisition OS
+                        </span>
+                    </h2>
+                    <p class="mt-3 text-sm text-indigo-200/80 leading-relaxed font-normal">
+                        Everything you need to find prospects, uncover high-opportunity website flaws, generate persuasive proposals, and showcase your digital portfolio.
+                    </p>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 backdrop-blur-md flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0">
+                            <i data-lucide="globe" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Targeted Lead Discovery Across 32 Countries</h4>
+                            <p class="text-[11px] text-slate-400">Search Dubai, London, New York, Karachi &amp; hundreds more cities.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 backdrop-blur-md flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">One-Click Client Proposal Generation</h4>
+                            <p class="text-[11px] text-slate-400">Generate scopes of work with live pricing and direct WhatsApp links.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 backdrop-blur-md flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-violet-600/20 border border-violet-500/30 text-violet-400 flex items-center justify-center shrink-0">
+                            <i data-lucide="palette" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Custom Agency Branding &amp; Portfolio</h4>
+                            <p class="text-[11px] text-slate-400">Personalize colors, fonts, logo, and share your public showcase.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative z-10 text-xs text-slate-400">
+                &copy; {% now "Y" %} LeadRadar AI Platform. All rights reserved.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

@@ -1,0 +1,479 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Settings — LeadRadar AI{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="w-full space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Settings &amp; Preferences</h1>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Connect your own email and WhatsApp, customize agency branding &amp; colors, and set up your public portfolio.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Tab menu -->
+        <nav class="lg:col-span-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2.5 space-y-1.5 h-fit shadow-sm dark:shadow-xl">
+            {% with t=tab %}
+            <a href="?tab=profile" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if t == 'profile' %}bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25{% else %}text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60{% endif %}">
+                <i data-lucide="user" class="w-4 h-4"></i> My Profile
+            </a>
+            <a href="?tab=email" class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if t == 'email' %}bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25{% else %}text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60{% endif %}">
+                <span class="flex items-center gap-3"><i data-lucide="mail" class="w-4 h-4"></i> Email (SMTP)</span>
+                {% if settings_obj.smtp_ready %}<span class="w-2 h-2 rounded-full bg-emerald-400"></span>{% else %}<span class="w-2 h-2 rounded-full bg-amber-400"></span>{% endif %}
+            </a>
+            <a href="?tab=whatsapp" class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if t == 'whatsapp' %}bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25{% else %}text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60{% endif %}">
+                <span class="flex items-center gap-3"><i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp</span>
+                {% if settings_obj.whatsapp_number %}<span class="w-2 h-2 rounded-full bg-emerald-400"></span>{% else %}<span class="w-2 h-2 rounded-full bg-amber-400"></span>{% endif %}
+            </a>
+            <a href="?tab=api" class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if t == 'api' %}bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25{% else %}text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60{% endif %}">
+                <span class="flex items-center gap-3"><i data-lucide="key-round" class="w-4 h-4"></i> API Keys</span>
+                {% if settings_obj.gemini_api_key_enc %}<span class="w-2 h-2 rounded-full bg-emerald-400"></span>{% endif %}
+            </a>
+            <a href="?tab=agency" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if t == 'agency' %}bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25{% else %}text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60{% endif %}">
+                <i data-lucide="palette" class="w-4 h-4 text-violet-500 dark:text-violet-400"></i> Agency &amp; Branding
+            </a>
+            <a href="?tab=faq" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if t == 'faq' %}bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25{% else %}text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60{% endif %}">
+                <i data-lucide="help-circle" class="w-4 h-4 text-cyan-500 dark:text-cyan-400"></i> FAQs &amp; Reviews
+            </a>
+            <a href="?tab=security" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if t == 'security' %}bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/25{% else %}text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60{% endif %}">
+                <i data-lucide="lock" class="w-4 h-4"></i> Password
+            </a>
+            {% endwith %}
+        </nav>
+
+        <!-- Tab content -->
+        <div class="lg:col-span-3 space-y-6">
+
+            {% if tab == 'profile' %}
+            <div class="bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm dark:shadow-xl">
+                <h2 class="text-base font-bold text-slate-900 dark:text-white">Personal details</h2>
+                <form method="POST" action="{% url 'accounts:settings' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="section" value="profile">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Login email</label>
+                        <input type="text" value="{{ user.email }}" disabled class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 text-slate-500 text-sm cursor-not-allowed">
+                    </div>
+                    {% include 'auth/_form_fields.html' with form=profile_form %}
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition">Save changes</button>
+                </form>
+            </div>
+            {% if workspace %}
+            <div class="bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 text-sm text-slate-700 dark:text-slate-300 space-y-2 shadow-sm dark:shadow-xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-slate-900 dark:text-white">Workspace</h3>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">{{ workspace.get_plan_display }}</span>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">{{ workspace.name }}</p>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            {% if tab == 'email' %}
+            <div class="bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm dark:shadow-xl">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 dark:text-white">Send pitches &amp; proposals from your own email</h2>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">Emails go out from your mailbox, so clients see your name and address, and their replies land in your inbox.</p>
+                </div>
+
+                {% if settings_obj.smtp_ready %}
+                <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-800 dark:text-emerald-200">Email is set up. Use "Save &amp; send test email" to confirm it works.</div>
+                {% else %}
+                <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-800 dark:text-amber-200">Email is not set up yet. Pick your provider below, then add your password (App Password for Gmail/Outlook).</div>
+                {% endif %}
+
+                <div x-data="{ preset(h,p,s){ document.getElementById('id_smtp_host').value=h; document.getElementById('id_smtp_port').value=p; document.getElementById('id_smtp_security').value=s; } }" class="flex flex-wrap gap-2 text-xs">
+                    <span class="text-slate-500 self-center font-semibold">Quick fill:</span>
+                    <button type="button" @click="preset('smtp.gmail.com',587,'tls')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium">Gmail</button>
+                    <button type="button" @click="preset('smtp.office365.com',587,'starttls')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium">Outlook</button>
+                    <button type="button" @click="preset('smtp.zoho.com',465,'ssl')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium">Zoho</button>
+                    <button type="button" @click="preset('smtp.mailgun.org',587,'tls')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium">Mailgun</button>
+                    <button type="button" @click="preset('smtp.sendgrid.net',587,'tls')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium">SendGrid</button>
+                </div>
+
+                <form method="POST" action="{% url 'accounts:settings' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="section" value="email">
+                    {% include 'auth/_form_fields.html' with form=email_form %}
+                    <div class="flex items-center gap-3 pt-2">
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition">Save</button>
+                        <button type="submit" name="send_test" value="1" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-sm transition">Save &amp; send test email</button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+
+            {% if tab == 'whatsapp' %}
+            <div class="bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm dark:shadow-xl">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 dark:text-white">Your WhatsApp number</h2>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">Used on your public portfolio page and proposal links so clients can click once to open a direct chat with you.</p>
+                </div>
+
+                <form method="POST" action="{% url 'accounts:settings' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="section" value="whatsapp">
+                    {% include 'auth/_form_fields.html' with form=whatsapp_form %}
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition">Save</button>
+                </form>
+            </div>
+            {% endif %}
+
+            {% if tab == 'api' %}
+            <div class="bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm dark:shadow-xl">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 dark:text-white">Bring your own AI key (optional)</h2>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">If you have a Google Gemini API key, add it here so LeadRadar uses your own quota to write personalized pitches.</p>
+                </div>
+
+                <form method="POST" action="{% url 'accounts:settings' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="section" value="api">
+                    {% include 'auth/_form_fields.html' with form=api_form %}
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition">Save</button>
+                </form>
+            </div>
+            {% endif %}
+
+            {% if tab == 'agency' %}
+            <div class="bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-7 shadow-sm dark:shadow-xl backdrop-blur-2xl"
+                 x-data="{
+                     currentPrimary: '{{ settings_obj.brand_color|default:"#6366f1" }}',
+                     currentAccent: '{{ settings_obj.accent_color|default:"#10b981" }}',
+                     currentFont: '{{ settings_obj.font_family|default:"Plus Jakarta Sans" }}',
+                     setTheme(p, a) {
+                         this.currentPrimary = p;
+                         this.currentAccent = a;
+                         const primaryInput = document.getElementById('id_brand_color');
+                         const accentInput = document.getElementById('id_accent_color');
+                         if (primaryInput) primaryInput.value = p;
+                         if (accentInput) accentInput.value = a;
+                     },
+                     setFont(f) {
+                         this.currentFont = f;
+                         const fontInput = document.getElementById('id_font_family');
+                         if (fontInput) fontInput.value = f;
+                     }
+                 }">
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                            <i data-lucide="palette" class="w-4 h-4"></i>
+                        </div>
+                        Agency Branding &amp; Font Typography Studio
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+                        Customize your agency logo, primary brand color, accent highlights, and professional typography. These settings dynamically brand the public client proposals and interactive portfolio links your prospects visit!
+                    </p>
+                </div>
+
+                <!-- Live Real-Time Brand Preview Canvas -->
+                <div class="p-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 space-y-4 shadow-inner">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+                            Live Dynamic Client Preview
+                        </span>
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300" x-text="'Font: ' + currentFont"></span>
+                    </div>
+
+                    <!-- Mock Client Card -->
+                    <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 space-y-4 shadow-md transition-all duration-200"
+                         :style="'font-family: \'' + currentFont + '\', sans-serif;'">
+                        <div class="flex items-center justify-between flex-wrap gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-4">
+                            <div class="flex items-center gap-3">
+                                {% if settings_obj.get_logo %}
+                                <img src="{{ settings_obj.get_logo }}" alt="Logo" class="h-9 w-auto max-w-[120px] object-contain rounded-lg">
+                                {% else %}
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white font-extrabold text-sm shadow-md"
+                                     :style="'background-color: ' + currentPrimary">
+                                    {{ settings_obj.display_agency_name|slice:":1"|upper }}
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <div class="font-extrabold text-base text-slate-900 dark:text-white">{{ settings_obj.display_agency_name }}</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ settings_obj.agency_tagline|default:"High-Converting Website Deliverables & Growth" }}</div>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold border transition-colors"
+                                  :style="'color: ' + currentAccent + '; border-color: ' + currentAccent + '40; background-color: ' + currentAccent + '15;'">
+                                ✓ Verified Agency
+                            </span>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <h3 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                                Tailored Digital Growth &amp; Interactive Proposal
+                            </h3>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                Experience how your headlines, body copy, and client deliverables render with your selected font and high-contrast agency branding.
+                            </p>
+                        </div>
+
+                        <div class="pt-2 flex items-center gap-3">
+                            <button type="button" class="px-4 py-2 rounded-xl text-white text-xs font-bold shadow-md transition"
+                                    :style="'background-color: ' + currentPrimary">
+                                View Proposal Online &rarr;
+                            </button>
+                            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">14-Day Delivery Guaranteed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- One-Click Preset Palettes -->
+                <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 space-y-3">
+                    <div class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i data-lucide="palette" class="w-3.5 h-3.5 text-indigo-500"></i>
+                        1-Click Popular Agency Color Themes
+                    </div>
+                    <div class="flex flex-wrap gap-2.5">
+                        <button type="button" @click="setTheme('#4f46e5', '#06b6d4')" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-800 dark:text-white transition shadow-sm">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#4f46e5]"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#06b6d4]"></span>
+                            <span>Modern Indigo</span>
+                        </button>
+                        <button type="button" @click="setTheme('#059669', '#10b981')" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-800 dark:text-white transition shadow-sm">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#059669]"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#10b981]"></span>
+                            <span>Emerald Growth</span>
+                        </button>
+                        <button type="button" @click="setTheme('#2563eb', '#38bdf8')" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-800 dark:text-white transition shadow-sm">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#2563eb]"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#38bdf8]"></span>
+                            <span>Electric Sapphire</span>
+                        </button>
+                        <button type="button" @click="setTheme('#7c3aed', '#ec4899')" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-800 dark:text-white transition shadow-sm">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#7c3aed]"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#ec4899]"></span>
+                            <span>Cyber Violet</span>
+                        </button>
+                        <button type="button" @click="setTheme('#e11d48', '#f97316')" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-800 dark:text-white transition shadow-sm">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#e11d48]"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#f97316]"></span>
+                            <span>Sunset Crimson</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- One-Click Font Typography Presets -->
+                <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 space-y-3">
+                    <div class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i data-lucide="type" class="w-3.5 h-3.5 text-indigo-500"></i>
+                        Popular Agency Typography Presets
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" @click="setFont('Plus Jakarta Sans')" :class="currentFont === 'Plus Jakarta Sans' ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200'" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition shadow-sm">
+                            Plus Jakarta Sans
+                        </button>
+                        <button type="button" @click="setFont('Inter')" :class="currentFont === 'Inter' ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200'" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition shadow-sm font-sans">
+                            Inter
+                        </button>
+                        <button type="button" @click="setFont('Space Grotesk')" :class="currentFont === 'Space Grotesk' ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200'" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition shadow-sm">
+                            Space Grotesk
+                        </button>
+                        <button type="button" @click="setFont('Outfit')" :class="currentFont === 'Outfit' ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200'" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition shadow-sm">
+                            Outfit
+                        </button>
+                        <button type="button" @click="setFont('Poppins')" :class="currentFont === 'Poppins' ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200'" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition shadow-sm">
+                            Poppins
+                        </button>
+                        <button type="button" @click="setFont('Montserrat')" :class="currentFont === 'Montserrat' ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200'" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition shadow-sm">
+                            Montserrat
+                        </button>
+                        <button type="button" @click="setFont('DM Sans')" :class="currentFont === 'DM Sans' ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200'" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold transition shadow-sm">
+                            DM Sans
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Public Agency Portfolio Link Box -->
+                <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 space-y-2.5" x-data="{ copied:false }">
+                    <div class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                        <span>Your Public Agency Portfolio Link</span>
+                        <a href="{% url 'portfolio:list' %}" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Manage portfolio projects &rarr;</a>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" readonly value="{{ portfolio_url }}" id="portfolio-link" class="flex-1 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 font-mono">
+                        <button type="button" @click="navigator.clipboard.writeText(document.getElementById('portfolio-link').value); copied=true; setTimeout(()=>copied=false,1500)" class="px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 transition">
+                            <span x-show="!copied">Copy Link</span>
+                            <span x-show="copied" x-cloak>Copied!</span>
+                        </button>
+                        <a href="{{ portfolio_url }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-sm transition">
+                            Open
+                        </a>
+                    </div>
+                </div>
+
+                {% if local_link_warning %}
+                <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-800 dark:text-amber-200">
+                    You are running on your local computer, so this link points to <strong>localhost</strong> and external prospects cannot view it from their phone or laptop. Put your domain or ngrok public tunnel URL in "Public site URL" below.
+                </div>
+                {% endif %}
+
+                <!-- Agency Form -->
+                <form method="POST" action="{% url 'accounts:settings' %}" enctype="multipart/form-data" class="space-y-5 pt-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="section" value="agency">
+                    
+                    {% if settings_obj.get_logo %}
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <img src="{{ settings_obj.get_logo }}" alt="Active Agency Logo" class="h-10 w-auto max-w-[140px] object-contain rounded-xl border border-slate-200 dark:border-slate-700 bg-white p-1">
+                            <div>
+                                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">✓ Active Agency Logo</span>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Displayed on your client proposals and public portfolio header</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400">Saved</span>
+                    </div>
+                    {% endif %}
+
+                    {% include 'auth/_form_fields.html' with form=agency_form %}
+
+                    <div class="pt-2">
+                        <button type="submit" class="px-7 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/30 transition">
+                            Save Brand &amp; Typography Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+
+            {% if tab == 'faq' %}
+            <div class="space-y-6">
+                <!-- FAQs Management Card -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm dark:shadow-xl">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 mb-2">
+                                <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
+                                Interactive Public Accordion
+                            </div>
+                            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Client Frequently Asked Questions (FAQs)</h2>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+                                Customize the exact questions and answers shown in the interactive accordion on your public portfolio page.
+                            </p>
+                        </div>
+                        <a href="{% url 'portfolio:faq_create' %}?from=settings" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition self-start sm:self-center">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add New FAQ
+                        </a>
+                    </div>
+
+                    <!-- FAQs List -->
+                    <div class="space-y-3">
+                        {% for faq in faqs %}
+                        <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                            <div class="space-y-1.5 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center">Q</span>
+                                    <h4 class="font-extrabold text-sm text-slate-900 dark:text-white">{{ faq.question }}</h4>
+                                </div>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 pl-7 leading-relaxed">{{ faq.answer }}</p>
+                            </div>
+                            <div class="flex items-center gap-2 self-end sm:self-start shrink-0">
+                                <a href="{% url 'portfolio:faq_update' faq.id %}?from=settings" class="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition shadow-sm" title="Edit FAQ">
+                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                </a>
+                                <form method="POST" action="{% url 'portfolio:faq_delete' faq.id %}?from=settings" onsubmit="return confirm('Are you sure you want to delete this FAQ?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition shadow-sm" title="Delete FAQ">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="p-8 text-center rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 text-slate-500">
+                            <i data-lucide="help-circle" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                            <p class="text-sm font-semibold">No custom FAQs added yet.</p>
+                            <p class="text-xs mt-1">Add your own custom FAQs above to dynamically showcase them on your portfolio link.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Testimonials & Reviews Management Card -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm dark:shadow-xl">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 mb-2">
+                                <i data-lucide="star" class="w-3.5 h-3.5 text-amber-500"></i>
+                                Social Proof &amp; Credibility
+                            </div>
+                            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Client Testimonials &amp; Reviews</h2>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+                                Real reviews and ratings from past clients to build immediate trust with new prospects visiting your portfolio.
+                            </p>
+                        </div>
+                        <a href="{% url 'portfolio:testimonial_create' %}?from=settings" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-md transition self-start sm:self-center">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add Client Review
+                        </a>
+                    </div>
+
+                    <!-- Testimonials List -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for t in testimonials %}
+                        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-3">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-1 text-amber-400">
+                                        {% for i in "12345" %}
+                                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        {% endfor %}
+                                    </div>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Verified Client</span>
+                                </div>
+                                <p class="text-xs text-slate-700 dark:text-slate-300 italic leading-relaxed">&ldquo;{{ t.feedback }}&rdquo;</p>
+                            </div>
+                            <div class="pt-3 border-t border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
+                                <div>
+                                    <div class="font-extrabold text-xs text-slate-900 dark:text-white">{{ t.client_name }}</div>
+                                    <div class="text-[11px] text-slate-500">{{ t.client_role|default:t.company_name }}</div>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <a href="{% url 'portfolio:testimonial_update' t.id %}?from=settings" class="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 transition" title="Edit">
+                                        <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                                    </a>
+                                    <form method="POST" action="{% url 'portfolio:testimonial_delete' t.id %}?from=settings" onsubmit="return confirm('Delete this review?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition" title="Delete">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-span-2 p-8 text-center rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 text-slate-500">
+                            <i data-lucide="star" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                            <p class="text-sm font-semibold">No client testimonials added yet.</p>
+                            <p class="text-xs mt-1">Add client feedback above to build strong social proof on your live portfolio.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if tab == 'security' %}
+            <div class="bg-white dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm dark:shadow-xl">
+                <h2 class="text-base font-bold text-slate-900 dark:text-white">Change password</h2>
+                <form method="POST" action="{% url 'accounts:settings' %}" class="space-y-4 max-w-md">
+                    {% csrf_token %}
+                    <input type="hidden" name="section" value="security">
+                    {% include 'auth/_form_fields.html' with form=security_form %}
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition">Change password</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
